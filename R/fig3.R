@@ -147,7 +147,7 @@ draw(ht_list, row_title = "Heatmap list", column_title = "Heatmap list")
 # ------------------------------------------------------------------------------------------------
 # Distal Lung
 
-fig3B_data <- readRDS('/Users/pmantri/Downloads/manuscript_repo/data/fig3B_data.rds')
+fig3B_data <- readRDS('../data/fig3B_data.rds')
 ggplot(fig3B_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
