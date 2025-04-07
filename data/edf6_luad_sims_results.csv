@@ -1,0 +1,24 @@
+celltype,celltype_leveldnd,celltype_level2,celltype_level3,celltype_level4,accuracy_leveldnd,accuracy_level2,accuracy_level3,accuracy_level4,accuracy_level_finest
+AT2,distal,Alveolar epithelium,AT2,AT2,1,1,1,0.950617283950617,0.950617283950617
+Suprabasal,proximal,Airway epithelium,Basal,Suprabasal,1,1,1,1,1
+Basal resting,proximal,Airway epithelium,Basal,Basal resting,1,1,1,0.32,0.32
+AT1,distal,Alveolar epithelium,AT1,AT1,1,1,1,1,1
+Multiciliated (non-nasal),proximal,Airway epithelium,Multiciliated lineage,Multiciliated,1,1,1,1,0.0674157303370787
+Hillock-like,proximal,Airway epithelium,Basal,Hillock-like,1,1,1,1,1
+Goblet (nasal),proximal,Airway epithelium,Secretory,Goblet,1,1,1,1,1
+Club (nasal),proximal,Airway epithelium,Secretory,Club,1,1,1,0.142857142857143,0.142857142857143
+Club (non-nasal),proximal,Airway epithelium,Secretory,Club,1,1,1,0,0
+SMG serous (bronchial),proximal,Submucosal Gland,Submucosal Secretory,SMG serous,1,1,1,0.853932584269663,0.247191011235955
+pre-TB secretory,proximal,Airway epithelium,Secretory,Transitional Club-AT2,0,0,0,0,0
+Multiciliated (nasal),proximal,Airway epithelium,Multiciliated lineage,Multiciliated,1,1,1,1,1
+Goblet (bronchial),proximal,Airway epithelium,Secretory,Goblet,1,1,1,1,1
+Neuroendocrine,proximal,Airway epithelium,Rare,Neuroendocrine,1,1,1,1,1
+SMG mucous,proximal,Submucosal Gland,Submucosal Secretory,SMG mucous,1,1,1,1,1
+AT2 proliferating,distal,Alveolar epithelium,AT2,AT2 proliferating,1,1,1,0.96,0.96
+Goblet (subsegmental),proximal,Airway epithelium,Secretory,Goblet,1,1,1,0.311926605504587,0.0275229357798165
+AT0,distal,Alveolar epithelium,AT2,AT0,1,1,1,1,1
+SMG duct,proximal,Submucosal Gland,Submucosal Secretory,SMG duct,1,0.988095238095238,0.988095238095238,0.988095238095238,0.988095238095238
+SMG serous (nasal),proximal,Submucosal Gland,Submucosal Secretory,SMG serous,1,1,1,0.857142857142857,0.727272727272727
+Ionocyte,proximal,Airway epithelium,Rare,Ionocyte,1,1,1,1,1
+Deuterosomal,proximal,Airway epithelium,Multiciliated lineage,Deuterosomal,1,1,1,0,0
+Tuft,proximal,Airway epithelium,Rare,Tuft,1,1,1,1,1
