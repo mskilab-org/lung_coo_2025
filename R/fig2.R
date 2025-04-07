@@ -2,7 +2,7 @@
 library(skitools)
 library(MASS)
 library(parallel)
-res = readRDS("Fig2B.rds")
+res = readRDS("../data/Fig2B.rds")
 
 #Set estimates value for each celltype below fdr threshold (0.1) to null value of 1. This effectively discards said celltypes from COO calling. 
 dt = dcast.data.table(res[grep('cov', name), ][, estimate2 := ifelse(fdr<0.1, estimate, 1)], tt ~ celltype, value.var = 'estimate2')
@@ -68,7 +68,7 @@ ppdf(
 library(skitools)
 library(MASS)
 library(parallel)
-res = readRDS("Fig2C.rds")
+res = readRDS("../data/Fig2C.rds")
 
 #Now set estimates value for each celltype below fdr threshold (0.1) to null value of 1. This effectively discards said celltypes from COO calling. 
 dt = dcast.data.table(res[grep('cov', name), ][, estimate2 := ifelse(fdr<0.1, estimate, 1)], tt ~ celltype, value.var = 'estimate2')
