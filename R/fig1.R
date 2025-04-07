@@ -4,7 +4,7 @@ library(skitools)
 library(dplyr)
 
 #Load identity calls per cell and patient.
-combined_emb = read.table("~/../spanja/Projects/COO/combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv",sep=",",header=TRUE)
+combined_emb = read.table("../data/combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv",sep=",",header=TRUE)
 query_samp = combined_emb[which(combined_emb$ref_or_query=="query"),]
 cellcount_mat = query_samp[,c("X","Patient")]
 aa = as.data.frame(table(cellcount_mat$Patient))
