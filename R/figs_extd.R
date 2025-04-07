@@ -19,7 +19,7 @@ library(ggforce)
 
 
 # ------------------------------------------------------------------------------------------------
-# EDF 8A
+# EDF 6A
 # ------------------------------------------------------------------------------------------------
 sims_acc_results <- fread('../data/edf6_luad_sims_results.csv')
 
@@ -90,7 +90,6 @@ set.seed(90210)
 Heatmap(t(mat.in.2[,1:23]), name = "Relative Risk", col = col_fun2, cluster_rows = TRUE, cluster_columns = TRUE, row_names_gp = gpar(fontsize = 15), column_names_gp = gpar(fontsize = 10), 
             column_names_side = c("bottom"), show_column_names = FALSE, column_km = 4, column_km_repeats = 100, top_annotation = column_ha2,
             show_parent_dend_line = FALSE, column_gap = unit(c(4), "mm"), column_title = NULL, border = TRUE)
-
 
 
 
