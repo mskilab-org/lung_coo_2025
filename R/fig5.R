@@ -199,13 +199,7 @@ ppdf(print(p),filename="Fig5D.pdf")
 ##Fig 5E ##
 #load libraries
 library(skitools)
-library(Seurat)
 library(EnhancedVolcano)
-
-#Load seurat filtered with WCM-1 cells.
-seu.wcm = readRDS("../data/Fig5_seu_wcm.rds") 
-Idents(seu.wcm) = seu.wcm@meta.data$cluster
-seu.wcm@active.assay = "RNA"
 
 #Load file with marker genes.
 seu.markers = readRDS("../data/Fig5E_seu_markers.rds")
