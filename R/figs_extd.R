@@ -25,44 +25,52 @@ library(ggforce)
 # ------------------------------------------------------------------------------------------------
 # EDF 6A
 # ------------------------------------------------------------------------------------------------
+
+# Accuracy for predicting true cell type at different levels 
+
 sims_acc_results <- fread('../data/edf6_luad_sims_results.csv')
 
-p1_4 <- ggplot(sims_acc_results[, .(celltype, accuracy_level_finest)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level_finest)) +
+# accuracy at level finest
+p1_5 <- ggplot(sims_acc_results[, .(celltype, accuracy_level_finest)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level_finest)) +
   geom_point(size=2, shape=23, color = 'darkgreen') + 
   theme_classic() +
   theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) + ylim(0,1) + 
   ggtitle("Finest level match") +
   xlab("True cell type") + ylab("Accuracy")
 
-p1_3 <- ggplot(sims_acc_results[, .(celltype, accuracy_level4)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level4)) +
+# accuracy at level 4 resolution
+p1_4 <- ggplot(sims_acc_results[, .(celltype, accuracy_level4)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level4)) +
   geom_point(size=2, shape=23, color = 'darkgreen') + 
   theme_classic() +
   theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  + ylim(0,1) + 
   ggtitle("Level 4 match") +
   xlab("True cell type") + ylab("Accuracy")
 
-p1_2 <- ggplot(sims_acc_results[, .(celltype, accuracy_level3)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level3)) +
+# accuracy at level 3 resolution
+p1_3 <- ggplot(sims_acc_results[, .(celltype, accuracy_level3)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level3)) +
   geom_point(size=2, shape=23, color = 'darkgreen') + 
   theme_classic() +
   theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  + ylim(0,1) + 
   ggtitle("Level 3 match") +
   xlab("True cell type") + ylab("Accuracy")
 
-p1_1 <- ggplot(sims_acc_results[, .(celltype, accuracy_level2)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level2)) +
+# accuracy at level 2 resolution
+p1_2 <- ggplot(sims_acc_results[, .(celltype, accuracy_level2)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level2)) +
   geom_point(size=2, shape=23, color = 'darkgreen') + 
   theme_classic() +
   theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  + ylim(0,1) + 
   ggtitle("Level 2 match") +
   xlab("True cell type") + ylab("Accuracy")
 
-p1_0 <- ggplot(sims_acc_results[, .(celltype, accuracy_leveldnd)] %>% as.data.frame(), aes(x = celltype, y = accuracy_leveldnd)) +
+# accuracy at level distal - non - distal resolution
+p1_1 <- ggplot(sims_acc_results[, .(celltype, accuracy_leveldnd)] %>% as.data.frame(), aes(x = celltype, y = accuracy_leveldnd)) +
   geom_point(size=2, shape=23, color = 'darkgreen') + 
   theme_classic() +
   theme( axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))  + ylim(0,1) + 
   ggtitle("Distal vs non-distal match") +
   xlab("True cell type") + ylab("Accuracy")
 
-p_acc <- ggpubr::ggarrange(p1_0, p1_1, p1_2, p1_3, p1_4, ncol = 3, nrow = 2)
+p_acc <- ggpubr::ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, ncol = 3, nrow = 2)
 print(p_acc)
 
 # ------------------------------------------------------------------------------------------------
