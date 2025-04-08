@@ -442,28 +442,29 @@ ppdf(print(p),file="edf7.pdf")
 # ------------------------------------------------------------------------------------------------
 # EDF 8A
 # ------------------------------------------------------------------------------------------------
+# Heat map for LUSC 
 
-col_fun2 <- readRDS('../data/col_fun2.rds')
-mat.in.2 <- fread('../data/mat.in.2.lusc.csv')
-mat.in.2 <- mat.in.2 %>% as.data.frame()
+nsclc_col <- readRDS('../data/nsclc_hm_col.rds')
+hm_lusc <- fread('../data/hm_lusc.csv')
+hm_lusc <- hm_lusc %>% as.data.frame()
 column_ha2 = HeatmapAnnotation(
-  sbs4 = anno_barplot(mat.in.2[,25], gp = gpar(col = "red", fill = "#FF0000")),
-  sbs1 = anno_barplot( mat.in.2[,26], gp = gpar(col = "green", fill = "#99FF33")) ,
-  sbs5 = anno_barplot(mat.in.2[,27], gp = gpar(col = "green", fill = "#99FF33")) ,
-  sbs2 = anno_barplot(mat.in.2[,28], gp = gpar(col = "orange", fill = "#FF8000")) ,
-  sbs13 = anno_barplot(mat.in.2[,29], gp = gpar(col = "orange", fill = "#FF8000")) ,
-  id1 = anno_barplot(mat.in.2[,31], gp = gpar(col = "green", fill = "#99FF33")) ,
-  id2 = anno_barplot(mat.in.2[,32], gp = gpar(col = "violet", fill = "#9900CC")) ,
-  id3 = anno_barplot(mat.in.2[,33], gp = gpar(col = "red", fill = "#FF0000")) ,
-  id12 = anno_barplot(mat.in.2[,34], gp = gpar(col = "violet", fill = "#9900CC")) ,
-  smoker = mat.in.2[,35],
+  sbs4 = anno_barplot(hm_lusc[,25], gp = gpar(col = "red", fill = "#FF0000")),
+  sbs1 = anno_barplot( hm_lusc[,26], gp = gpar(col = "green", fill = "#99FF33")) ,
+  sbs5 = anno_barplot(hm_lusc[,27], gp = gpar(col = "green", fill = "#99FF33")) ,
+  sbs2 = anno_barplot(hm_lusc[,28], gp = gpar(col = "orange", fill = "#FF8000")) ,
+  sbs13 = anno_barplot(hm_lusc[,29], gp = gpar(col = "orange", fill = "#FF8000")) ,
+  id1 = anno_barplot(hm_lusc[,31], gp = gpar(col = "green", fill = "#99FF33")) ,
+  id2 = anno_barplot(hm_lusc[,32], gp = gpar(col = "violet", fill = "#9900CC")) ,
+  id3 = anno_barplot(hm_lusc[,33], gp = gpar(col = "red", fill = "#FF0000")) ,
+  id12 = anno_barplot(hm_lusc[,34], gp = gpar(col = "violet", fill = "#9900CC")) ,
+  smoker = hm_lusc[,35],
   col = list(
     smoker = c("Smoker" = "orange", "Never Smoker" = "blue") 
   )
 )
 
 set.seed(90210)
-Heatmap(t(mat.in.2[,1:23]), name = "Relative Risk", col = col_fun2, cluster_rows = TRUE, cluster_columns = TRUE, row_names_gp = gpar(fontsize = 15), column_names_gp = gpar(fontsize = 10), 
+Heatmap(t(hm_lusc[,1:23]), name = "Relative Risk", col = nsclc_col, cluster_rows = TRUE, cluster_columns = TRUE, row_names_gp = gpar(fontsize = 15), column_names_gp = gpar(fontsize = 10), 
             column_names_side = c("bottom"), show_column_names = FALSE, column_km = 4, column_km_repeats = 100, top_annotation = column_ha2,
             show_parent_dend_line = FALSE, column_gap = unit(c(4), "mm"), column_title = NULL, border = TRUE)
 
