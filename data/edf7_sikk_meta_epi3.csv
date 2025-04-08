@@ -1,0 +1,24 @@
+ann_level_1,ann_level_2,ann_level_3,ann_level_4,ann_level_5,ann_finest_level,ann_level_dnd
+Epithelial,Alveolar epithelium,AT2,AT2,AT2,AT2,distal
+Epithelial,Airway epithelium,Basal,Suprabasal,Suprabasal,Suprabasal,proximal
+Epithelial,Airway epithelium,Basal,Basal resting,Basal resting,Basal resting,proximal
+Epithelial,Alveolar epithelium,AT1,AT1,AT1,AT1,distal
+Epithelial,Airway epithelium,Multiciliated lineage,Multiciliated,Multiciliated (non-nasal),Multiciliated (non-nasal),proximal
+Epithelial,Airway epithelium,Basal,Hillock-like,Hillock-like,Hillock-like,proximal
+Epithelial,Airway epithelium,Secretory,Goblet,Goblet (nasal),Goblet (nasal),proximal
+Epithelial,Airway epithelium,Secretory,Club,Club (nasal),Club (nasal),proximal
+Epithelial,Airway epithelium,Secretory,Club,Club (non-nasal),Club (non-nasal),proximal
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG serous,SMG serous (bronchial),SMG serous (bronchial),proximal
+Epithelial,Airway epithelium,Secretory,Transitional Club-AT2,pre-TB secretory,pre-TB secretory,proximal
+Epithelial,Airway epithelium,Multiciliated lineage,Multiciliated,Multiciliated (nasal),Multiciliated (nasal),proximal
+Epithelial,Airway epithelium,Secretory,Goblet,Goblet (bronchial),Goblet (bronchial),proximal
+Epithelial,Airway epithelium,Rare,Neuroendocrine,Neuroendocrine,Neuroendocrine,proximal
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG mucous,SMG mucous,SMG mucous,proximal
+Epithelial,Alveolar epithelium,AT2,AT2 proliferating,AT2 proliferating,AT2 proliferating,distal
+Epithelial,Airway epithelium,Secretory,Goblet,Goblet (subsegmental),Goblet (subsegmental),proximal
+Epithelial,Alveolar epithelium,AT2,AT0,AT0,AT0,distal
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG duct,SMG duct,SMG duct,proximal
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG serous,SMG serous (nasal),SMG serous (nasal),proximal
+Epithelial,Airway epithelium,Rare,Ionocyte,Ionocyte,Ionocyte,proximal
+Epithelial,Airway epithelium,Multiciliated lineage,Deuterosomal,Deuterosomal,Deuterosomal,proximal
+Epithelial,Airway epithelium,Rare,Tuft,Tuft,Tuft,proximal
