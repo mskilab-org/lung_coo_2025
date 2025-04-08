@@ -1,6 +1,5 @@
 library(skitools)
 library(data.table)
-library(skitools)
 library(skidb)
 library(plyr)
 library(dplyr)
@@ -8,7 +7,6 @@ library(MASS)
 library(wesanderson)
 library(readxl)
 library(ggalluvial)
-library(wesanderson)
 library(readxl)
 library(ggsankey)
 library(effects)
@@ -16,6 +14,7 @@ library(stats)
 library(forcats) 
 library(ggpubr)
 library(ggforce)
+library(ComplexHeatmap)
 
 
 
@@ -469,6 +468,39 @@ Heatmap(t(hm_lusc[,1:23]), name = "Relative Risk", col = nsclc_col, cluster_rows
             show_parent_dend_line = FALSE, column_gap = unit(c(4), "mm"), column_title = NULL, border = TRUE)
 
 
+
+
+# ------------------------------------------------------------------------------------------------
+# EDF 9A
+# ------------------------------------------------------------------------------------------------
+
+
+
+pts_coo_id_4B <- readRDS( '../data/pts_coo_id_4B.rds')
+pts_coo_id_4C <- copy(pts_coo_id_4B)
+pts_coo_id_4C$Lineage_plasticity <- ''
+pts_coo_id_4C[Identity == 'Distal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
+pts_coo_id_4C[Identity == 'Proximal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
+pts_coo_id_4C[Identity == 'Distal Lung' & Origin == 'Non-Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
+pts_coo_id_4C[Identity == 'Proximal Lung' & Origin == 'Non-Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
+
+res.plot =  pts_coo_id_4C[, prop.test(sum(Lineage_plasticity == 'Lineage plasticity'), .N) %>% dflm %>% cbind(nprox = sum(Lineage_plasticity == 'Lineage plasticity'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
+res.plot$Origin = factor(res.plot$Origin, levels = c('Non-Distal Lung','Distal Lung'))
+res.plot$TP53_mut = factor(res.plot$TP53_mut, levels = c('TP53 MUT','WT'))
+ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  facet_grid(~Origin) +
+  scale_fill_manual(values = c(wes_palettes$Royal1[2], wes_palettes$Royal1[1])) +
+  labs(title = '', x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 0, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = TP53_mut, y = ci.upper + 0.05, label = paste0(nprox, '/', tot)), size = 7) + 
+  guides(fill = guide_legend(title = 'Fig 4C - Lineage plasticity fraction')) + theme(legend.position = "bottom")
 
 
 # ------------------------------------------------------------------------------------------------
