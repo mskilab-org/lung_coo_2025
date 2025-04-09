@@ -675,6 +675,18 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 
 
 # ------------------------------------------------------------------------------------------------
+# EDF 9G
+# ------------------------------------------------------------------------------------------------
+library(skitools)
+
+edf9g_a <- readRDS('../data/edf9g_a.rds')
+edf9g_b <- readRDS('../data/edf9g_b.rds')
+
+oncoprint(edf9g_b, oncotab = edf9g_a,  genes = c('NKX2-1','SMARCA4','STK11','APC','KEAP1','ALK','MCL1','MAP2K1','EGFR','FGFR1','FOXP1','CDK6','BCL2L1', 'TP53','RB1','CDKN2A','TERT','MYC','ARID1A','PTEN','CCND1','PIK3CA','ERBB2','CCNE1','NF1'), sort.genes = FALSE, colnames.fontsize = 20, 
+          rownames.fontsize = 15, signature.thresh = 20, track.height = 1.5, split.gap = 0.5, wes = TRUE, track.gap = track.height/2, drop = TRUE, drop.genes = TRUE, svevents = FALSE,  sort.tumors = FALSE,
+          return.oncotab = FALSE, height = 12, width = 25,  filename = 'EDF9g_onco.pdf')
+
+# ------------------------------------------------------------------------------------------------
 # EDF 10 A 
 # ------------------------------------------------------------------------------------------------
 tmp.plot = readRDS("../data/edf10.rds")
