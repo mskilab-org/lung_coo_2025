@@ -20,7 +20,6 @@ library(ComplexHeatmap)
 
 
 
-
 # ------------------------------------------------------------------------------------------------
 # EDF 6A
 # ------------------------------------------------------------------------------------------------
@@ -674,3 +673,40 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'Histology')) + theme(legend.position = "top")
 
 
+
+# ------------------------------------------------------------------------------------------------
+# EDF 10 A 
+# ------------------------------------------------------------------------------------------------
+tmp.plot = readRDS("../data/edf10.rds")
+
+highlight_color <- "darkslategray3"  # Color for WCM-1
+grey_color <- "grey"        # Color for other patients
+
+tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", highlight_color, grey_color)
+
+p <- ggplot(tmp.plot, aes(x, y, colour = color), size = 3) + 
+  geom_point() + 
+  theme_bw() + 
+  theme(legend.position = "top") +
+  scale_colour_identity()
+ppdf(print(p),filename="UMAP with WCM-1 patient knn6_nw1.pdf")
+
+# ------------------------------------------------------------------------------------------------
+# EDF 10 B
+# ------------------------------------------------------------------------------------------------
+library(RColorBrewer)
+
+my_colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(tmp.plot$cluster)))
+my_colors[1] <- 'turquoise4'
+my_colors[2] <- 'mediumseagreen'
+my_colors[3] <- 'darkred'
+names(my_colors) <- unique(tmp.plot$cluster)
+tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", my_colors[tmp.plot$cluster], "grey")
+p <- ggplot(tmp.plot, aes(x = x, y = y, colour = factor(cluster)), size = 3) + 
+  geom_point(aes(color = ifelse(patient == "WCM-1", as.character(cluster), "Other"))) + 
+  scale_color_manual(values = c(my_colors, Other = "grey"), 
+                     breaks = c(names(my_colors), "Other"),
+                     labels = c(names(my_colors), "Other Patients")) +
+  theme_bw() + 
+  theme(legend.position = "top") 
+ppdf(print(p),filename="UMAP with WCM-1 with clusters in knn6.pdf")
