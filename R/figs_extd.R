@@ -468,6 +468,56 @@ Heatmap(t(hm_lusc[,1:23]), name = "Relative Risk", col = nsclc_col, cluster_rows
 
 
 
+# ------------------------------------------------------------------------------------------------
+# EDF 8B
+# ------------------------------------------------------------------------------------------------
+
+# LUSC - Cluster 1 Distal Lung
+edf_8_data <- readRDS('../data/edf8.rds')
+ggplot(edf_8_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
+  geom_bar(stat = "identity", alpha = 0.9) +
+  scale_fill_manual(values = c("grey")) +
+  geom_errorbar(aes(ymax = ci.upper, ymin = ci.lower), size = 0.65, width = 0.25, color = 'black') +
+  scale_y_continuous(breaks = seq(in.axis.min-0.05, in.axis.max+0.05, in.axis.breaks), labels = function(y) y + 1, limits = c(-0.25, 0.35)) + # LUAD
+  scale_fill_manual("legend", values = c("Proximal" = "olivedrab3", "Distal" = "darkgoldenrod3")) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank()) +
+  xlab("") +
+  ylab("Relative Risk") +
+  ggtitle(paste0('LUSC Cluster 1')) +
+  theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
+  coord_flip()
+
+# LUSC - Cluster 2 Proximal 1
+ggplot(edf_8_data[cluster == 'Proximal_1'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
+  geom_bar(stat = "identity", alpha = 0.9) +
+  scale_fill_manual(values = c("grey")) +
+  geom_errorbar(aes(ymax = ci.upper, ymin = ci.lower), size = 0.65, width = 0.25, color = 'black') +
+  scale_y_continuous(breaks = seq(in.axis.min-0.05, in.axis.max+0.05, in.axis.breaks), labels = function(y) y + 1, limits = c(-0.25, 0.35)) + # LUAD
+  scale_fill_manual("legend", values = c("Proximal" = "olivedrab3", "Distal" = "darkgoldenrod3")) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank()) +
+  xlab("") +
+  ylab("Relative Risk") +
+  ggtitle(paste0('LUSC Cluster 2')) +
+  theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
+  coord_flip()
+
+# LUSC - Cluster 3  Proximal_2
+ggplot(edf_8_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
+  geom_bar(stat = "identity", alpha = 0.9) +
+  scale_fill_manual(values = c("grey")) +
+  geom_errorbar(aes(ymax = ci.upper, ymin = ci.lower), size = 0.65, width = 0.25, color = 'black') +
+  scale_y_continuous(breaks = seq(in.axis.min-0.05, in.axis.max+0.05, in.axis.breaks), labels = function(y) y + 1, limits = c(-0.25, 0.35)) + # LUAD
+  scale_fill_manual("legend", values = c("Proximal" = "olivedrab3", "Distal" = "darkgoldenrod3")) +
+  theme_bw() +
+  theme(panel.grid.minor = element_blank()) +
+  xlab("") +
+  ylab("Relative Risk") +
+  ggtitle(paste0('LUSC Cluster 3')) +
+  theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
+  coord_flip()
+
 
 # ------------------------------------------------------------------------------------------------
 # EDF 9A
