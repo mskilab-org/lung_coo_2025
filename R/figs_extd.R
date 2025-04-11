@@ -525,15 +525,14 @@ ggplot(edf_8_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
 
 
 
-pts_coo_id_4B <- readRDS( '../data/pts_coo_id_4B.rds')
-pts_coo_id_4C <- copy(pts_coo_id_4B)
-pts_coo_id_4C$Lineage_plasticity <- ''
-pts_coo_id_4C[Identity == 'Distal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
-pts_coo_id_4C[Identity == 'Proximal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
-pts_coo_id_4C[Identity == 'Distal Lung' & Origin == 'Non-Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
-pts_coo_id_4C[Identity == 'Proximal Lung' & Origin == 'Non-Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
+pts_coo_id_edf9a <- readRDS( '../data/pts_coo_id_4B.rds')
+pts_coo_id_edf9a$Lineage_plasticity <- ''
+pts_coo_id_edf9a[Identity == 'Distal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
+pts_coo_id_edf9a[Identity == 'Proximal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
+pts_coo_id_edf9a[Identity == 'Distal Lung' & Origin == 'Non-Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
+pts_coo_id_edf9a[Identity == 'Proximal Lung' & Origin == 'Non-Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
 
-res.plot =  pts_coo_id_4C[, prop.test(sum(Lineage_plasticity == 'Lineage plasticity'), .N) %>% dflm %>% cbind(nprox = sum(Lineage_plasticity == 'Lineage plasticity'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
+res.plot =  pts_coo_id_edf9a[, prop.test(sum(Lineage_plasticity == 'Lineage plasticity'), .N) %>% dflm %>% cbind(nprox = sum(Lineage_plasticity == 'Lineage plasticity'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
 res.plot$Origin = factor(res.plot$Origin, levels = c('Non-Distal Lung','Distal Lung'))
 res.plot$TP53_mut = factor(res.plot$TP53_mut, levels = c('TP53 MUT','WT'))
 ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
@@ -550,6 +549,37 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = TP53_mut, y = ci.upper + 0.05, label = paste0(nprox, '/', tot)), size = 7) + 
   guides(fill = guide_legend(title = 'Fig 4C - Lineage plasticity fraction')) + theme(legend.position = "bottom")
+
+
+# ------------------------------------------------------------------------------------------------
+# EDF 9B
+# ------------------------------------------------------------------------------------------------
+tmp.plot.luad.df3 <- readRDS('../data/edf9b.rds')
+
+tmp.plot.luad.pl <- ggplot(tmp.plot.luad.df3, aes(x = x,                        
+                                                  next_x = next_x,                                     
+                                                  node = node,
+                                                  next_node = next_node,        
+                                                  fill = factor(node),
+                                                  label = paste0(node, " = ", n)))             # This Creates a label for each node
+
+tmp.plot.luad.pl <- tmp.plot.luad.pl +geom_sankey(flow.alpha = 0.5,          #This Creates the transparency of your node 
+                                                  node.color = "black",     # This is your node color        
+                                                  show.legend = TRUE)        # This determines if you want your legend to show
+
+tmp.plot.luad.pl <- tmp.plot.luad.pl + geom_sankey_label(Size = 3,
+                                                         color = "black", 
+                                                         fill = "white") # This specifies the Label format for each node 
+tmp.plot.luad.pl <- tmp.plot.luad.pl + theme_bw()
+tmp.plot.luad.pl <- tmp.plot.luad.pl + theme(legend.position = 'none')
+tmp.plot.luad.pl <- tmp.plot.luad.pl + theme(axis.title = element_blank(),
+                                             axis.text.y = element_blank(),
+                                             axis.ticks = element_blank(),
+                                             panel.grid = element_blank())
+tmp.plot.luad.pl <- tmp.plot.luad.pl + labs(title = "Origin - Identity - Histology")
+tmp.plot.luad.pl <- tmp.plot.luad.pl + labs(subtitle = "LUAD")
+tmp.plot.luad.pl <- tmp.plot.luad.pl + labs(fill = 'Nodes')
+tmp.plot.luad.pl
 
 
 # ------------------------------------------------------------------------------------------------
