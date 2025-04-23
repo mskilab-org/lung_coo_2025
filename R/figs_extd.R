@@ -16,8 +16,91 @@ library(ggpubr)
 library(ggforce)
 library(ComplexHeatmap)
 
+# ------------------------------------------------------------------------------------------------
+# EDF 1A
+# ------------------------------------------------------------------------------------------------
+
+#Load the required libraries.
+library(skitools)
+library(Seurat)
+
+#Load the expression matrix and the cluster data.
+expDat = readRDS("../data/sup1AExp.rds")
+clustDat = readRDS("../data/sup1AClusters.rds")
+
+#Construct the seurat object.
+seu = CreateSeuratObject(counts = expDat)
+seu@meta.data$seurat_clusters = clustDat
+
+#Generate the Dotplot.
+p = DotPlot(seu, features = rownames(expDat), group.by="seurat_clusters") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
+ppdf(print(p),filename="../data/Supp1A.pdf")
 
 
+# ------------------------------------------------------------------------------------------------
+# EDF 1B & 1C
+# ------------------------------------------------------------------------------------------------
+
+#Load required libraries.
+library(skitools)
+library(Seurat)
+library(ggpubr)
+
+#Load seurat metadata (with clustering results and cell names), load per cell aneploidy scores, and load shannon entropy scores per cluster.
+tmp.plot = data.table(readRDS("~/projects/scLung/db/seuMetaData.rds"))
+tmp.l.norm = readRDS("~/../spanja/Projects/COO/anneuploidy zscore.rds")
+exp_shannon = readRDS("/gpfs/commons/home/jandrademartínez/projects/scLung/db/clusterEntropy.rds")
+
+#Create table of total aneuploidy score per cell. Add to the metadata table.
+aneu.score = data.table(cell = rownames(tmp.l.norm), Aneuplody.Score = apply(tmp.l.norm,1,function(x) sum(abs(x))))
+tmp.plot = merge(tmp.plot,aneu.score,by = 'cell')
+
+#Compute aneuploidy score per cluster. 
+tmp.df = aggregate(Aneuplody.Score ~ seurat_clusters, data = tmp.plot, FUN = mean)
+colnames(tmp.df)[2] = 'Aneuploidy.Score.mean'
+#Add diversity (entropy) value per cluster. 
+tmp.df$S.Diversity.num = exp_shannon
+
+
+#Label carcinoma cluster based on high aneuploidy and low entropy.
+tmp.df$cat = ifelse(((tmp.df$S.Diversity.num < 10) &(tmp.df$Aneuploidy.Score.mean > 40)),"Carcinoma","Others")
+tmp.nw = tmp.plot[,.(Tissue,seurat_clusters)]
+tmp.nw = as.data.frame(tmp.nw)
+tmp.dt = tmp.df
+tmp.df = as.data.frame(tmp.df)
+tmp.df = merge(tmp.df,tmp.nw,by='seurat_clusters')
+tmp.df.nw = tmp.df %>%  distinct(seurat_clusters, .keep_all = TRUE)
+tmp.df.nw = as.data.table(tmp.df.nw)
+#Add annotations for non-carcinoma clusters based on their associated tissue (tumor associated epithlial or normal).
+tmp.df.nw[which((tmp.df.nw$Tissue == "Tumor" | tmp.df.nw$Tissue == "Metastasis") & (tmp.df.nw$cat == "Others")),"cat"] = "Tumor Associated Epithelial"
+tmp.df.nw[which(tmp.df.nw$Tissue== "Adjacent Lung") & (tmp.df.nw$cat == "Others"),"cat"] = "Normal"
+tmp.df.nw[13,'cat']="Carcinoma"
+
+#Generate scatterplot for Sup 1B.
+p = ggscatter(tmp.df.nw, x = "S.Diversity.num", y = "Aneuploidy.Score.mean",
+              color = 'cat',
+              repel = TRUE, xlab = "Shannon's Diversity", ylab = 'Aneuploidy Score (mean)')
+ppdf(print(p), cex = 0.7,filename="../data/Supp1C.pdf")
+
+#Link carcinoma and non-carcinoma annotations to each cell.
+tmp.plot$cat = ""
+for(i in 1:nrow(tmp.df.nw)){
+    tmp.plot[tmp.plot$seurat_clusters==tmp.df.nw$seurat_clusters[i],]$cat = tmp.df.nw$cat[i]  
+    }
+#Organize cells by annotation.
+tmp.plot$cat = factor(tmp.plot$cat, levels = c("Normal","Tumor Associated Epithelial","Carcinoma"))
+tmp.plot = tmp.plot[order(tmp.plot$cat),]                   
+
+#Organize rows in aneuploidy output for heatmap.
+tmp.l.nw = tmp.l.norm[match(tmp.plot$cell,rownames(tmp.l.norm)),]
+
+#Set heatmap annotation and color.
+row.ha = HeatmapAnnotation(Tissue = tmp.plot$cat, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Tissue = c("Carcinoma" = "#F8766D", "Normal" = "#00BA38", "Tumor Associated Epithelial" = "#619CFF")), annotation_legend_param = list("Normal", "Tumor Epithelial", "Carcinoma"), which = "row")
+library(circlize)
+col_fun = colorRamp2(c(-10, 0, 10), c("blue", "white", "red"))
+#Plot heatmap.
+p = Heatmap(tmp.l.nw, name = 'z-score', col = col_fun, cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold")) + row.ha
+ppdf(print(p), cex = c(1,2),filename="../data/Supp1C.pdf")
 
 
 # ------------------------------------------------------------------------------------------------
