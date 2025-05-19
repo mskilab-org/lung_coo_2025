@@ -166,11 +166,10 @@ rownames(acc_mat) = c("AT2","AT1","secretory","basal","ciliated","other")
 acc_mat = as.data.frame(acc_mat)
 acc_mat$cat = rownames(acc_mat)
 
-pdf("../data/test.pdf",width=15,height = 10)
-ggplot(acc_mat, aes(x = cat, y = V1)) +
+p = ggplot(acc_mat, aes(x = cat, y = V1)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   theme_minimal() + coord_flip()
-dev.off()
+print(p)
                                                                              
 # ------------------------------------------------------------------------------------------------
 # EDF 6A
