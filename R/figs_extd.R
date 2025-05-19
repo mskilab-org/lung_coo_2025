@@ -102,7 +102,76 @@ col_fun = colorRamp2(c(-10, 0, 10), c("blue", "white", "red"))
 p = Heatmap(tmp.l.nw, name = 'z-score', col = col_fun, cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold")) + row.ha
 ppdf(print(p), cex = c(1,2),filename="../data/Supp1C.pdf")
 
+# ------------------------------------------------------------------------------------------------
+# EDF 3
+# ------------------------------------------------------------------------------------------------
 
+#Load libraries.
+library(skitools)
+
+#Load file with cell metadata and identity call results.
+normal_labs = fread("../data/combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv")
+#Filter results based on uncertainty of identity calls. If uncertainty is lower than 0.5, label as unknown.
+normal_labs$ann_finest_lev_transferred_label_filtered = ifelse(normal_labs$ann_finest_lev_transfer_uncert < 0.5,normal_labs$ann_finest_lev_transferred_label_unfiltered,"Unknown")
+#Filter for identity call results and true identity labels.
+normal.mat = normal_labs[,c("V1","ann_finest_lev_transferred_label_filtered","major.ident.f","ref_or_query")]
+
+#Filter for cells used as query (i.e.: not used for training). Remove all cells with unknown labels, then adjust labels based on celltype identity calls.
+query_mat = normal.mat[which(normal.mat$ref_or_query=="query"),]
+query_mat = query_mat[which(query_mat$ann_finest_lev_transferred_label_filtered!="Unknown"),]
+AT2 = c("AT2","AT0","AT2 proliferating")
+AT1 = c("AT1")
+smg = c("SMG serous (bronchial)","SMG mucous","SMG duct","SMG serous (nasal)")
+ciliated = c("Multiciliated (non-nasal)","Multiciliated (nasal)","Deuterosomal")
+basal = c("Basal resting","Suprabasal","Hillock-like")
+secretory = c("Goblet (nasal)","Club (nasal)","Club (non-nasal)","pre-TB secretory","Goblet (bronchial)","Goblet (subsegmental)")
+other = c("Tuft","Ionocyte","Neuroendocrine")
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% AT2,"transfered_labs"]="AT2"
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% AT1,"transfered_labs"]="AT1"
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% smg,"transfered_labs"]="SMG"
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% ciliated,"transfered_labs"]="ciliated"
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% basal,"transfered_labs"]="basal"
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% rare,"transfered_labs"]="other"
+query_mat[query_mat$ann_finest_lev_transferred_label_filtered %in% secretory,"transfered_labs"]="secretory"
+query_mat[query_mat$major.ident.f %in% c("Alveolar.Type.II.cells"),"orig_labs"]="AT2"
+query_mat[query_mat$major.ident.f %in% c("Club.cells"),"orig_labs"]="secretory"
+query_mat[query_mat$major.ident.f %in% c("Alveolar.Type.I.cells"),"orig_labs"]="AT1"
+query_mat[query_mat$major.ident.f %in% c("Basal.cells"),"orig_labs"]="basal"
+query_mat[query_mat$major.ident.f %in% c("Ciliated.cells"),"orig_labs"]="ciliated"
+query_mat[query_mat$major.ident.f %in% c("Neuroendocrine.cells"),"orig_labs"]="other"
+
+#Compute accuracy by comparing identity calls vs true identities.
+AT2_mat = query_mat[which(query_mat$orig_labs=="AT2"),]
+AT2_acc = sum(AT2_mat$transfered_labs==AT2_mat$orig_labs)/nrow(AT2_mat)
+
+AT1_mat = query_mat[which(query_mat$orig_labs=="AT1"),]
+AT1_acc = sum(AT1_mat$transfered_labs==AT1_mat$orig_labs)/nrow(AT1_mat)
+
+secretory_mat = query_mat[which(query_mat$orig_labs=="secretory"),]
+secretory_acc = sum(secretory_mat$transfered_labs==secretory_mat$orig_labs)/nrow(secretory_mat)
+
+basal_mat = query_mat[which(query_mat$orig_labs=="basal"),]
+basal_acc = sum(basal_mat$transfered_labs==basal_mat$orig_labs)/nrow(basal_mat)
+
+rare_mat = query_mat[which(query_mat$orig_labs=="other"),]
+rare_acc = sum(rare_mat$transfered_labs==rare_mat$orig_labs)/nrow(rare_mat)
+
+ciliated_mat = query_mat[which(query_mat$orig_labs=="ciliated"),]
+ciliated_acc = sum(ciliated_mat$transfered_labs==ciliated_mat$orig_labs)/nrow(ciliated_mat)
+
+#Combine results into a matrix and plot.
+acc_mat = c(AT2_acc,AT1_acc,secretory_acc,basal_acc,ciliated_acc,rare_acc)
+acc_mat = as.matrix(acc_mat)
+rownames(acc_mat) = c("AT2","AT1","secretory","basal","ciliated","other")
+acc_mat = as.data.frame(acc_mat)
+acc_mat$cat = rownames(acc_mat)
+
+pdf("../data/test.pdf",width=15,height = 10)
+ggplot(acc_mat, aes(x = cat, y = V1)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  theme_minimal() + coord_flip()
+dev.off()
+                                                                             
 # ------------------------------------------------------------------------------------------------
 # EDF 6A
 # ------------------------------------------------------------------------------------------------
