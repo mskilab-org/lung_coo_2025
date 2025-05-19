@@ -1,0 +1,24 @@
+ann_level_1,ann_level_2,ann_level_3,ann_level_4,ann_level_5,ann_finest_level
+Epithelial,Alveolar epithelium,AT2,None,None,AT2
+Epithelial,Airway epithelium,Basal,Suprabasal,None,Suprabasal
+Epithelial,Airway epithelium,Basal,Basal resting,None,Basal resting
+Epithelial,Alveolar epithelium,AT1,None,None,AT1
+Epithelial,Airway epithelium,Multiciliated lineage,Multiciliated,Multiciliated (non-nasal),Multiciliated (non-nasal)
+Epithelial,Airway epithelium,Basal,Hillock-like,None,Hillock-like
+Epithelial,Airway epithelium,Secretory,Goblet,Goblet (nasal),Goblet (nasal)
+Epithelial,Airway epithelium,Secretory,Club,Club (nasal),Club (nasal)
+Epithelial,Airway epithelium,Secretory,Club,Club (non-nasal),Club (non-nasal)
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG serous,SMG serous (bronchial),SMG serous (bronchial)
+Epithelial,Airway epithelium,Secretory,Transitional Club-AT2,pre-TB secretory,pre-TB secretory
+Epithelial,Airway epithelium,Multiciliated lineage,Multiciliated,Multiciliated (nasal),Multiciliated (nasal)
+Epithelial,Airway epithelium,Secretory,Goblet,Goblet (bronchial),Goblet (bronchial)
+Epithelial,Airway epithelium,Rare,Neuroendocrine,None,Neuroendocrine
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG mucous,None,SMG mucous
+Epithelial,Alveolar epithelium,AT2,AT2 proliferating,None,AT2 proliferating
+Epithelial,Airway epithelium,Secretory,Goblet,Goblet (subsegmental),Goblet (subsegmental)
+Epithelial,Airway epithelium,Secretory,Transitional Club-AT2,AT0,AT0
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG duct,None,SMG duct
+Epithelial,Submucosal Gland,Submucosal Secretory,SMG serous,SMG serous (nasal),SMG serous (nasal)
+Epithelial,Airway epithelium,Rare,Ionocyte,None,Ionocyte
+Epithelial,Airway epithelium,Multiciliated lineage,Deuterosomal,None,Deuterosomal
+Epithelial,Airway epithelium,Rare,Tuft,None,Tuft
