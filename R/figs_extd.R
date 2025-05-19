@@ -103,6 +103,54 @@ p = Heatmap(tmp.l.nw, name = 'z-score', col = col_fun, cluster_rows = FALSE, clu
 ppdf(print(p), cex = c(1,2),filename="../data/Supp1C.pdf")
 
 # ------------------------------------------------------------------------------------------------
+# EDF 2
+# ------------------------------------------------------------------------------------------------
+
+#Load requires libraries.
+library(skitools)
+library(data.tree)
+
+#Load sikkema metadata table. Format data so that each row represents a full hierarchy for a given celltype.
+sikkema_meta = read.table("../data/sikk_meta_epi.csv",header=T,sep=",")
+sikkema_meta = sikkema_meta[,c("ann_level_1","ann_level_2","ann_level_3","ann_level_4","ann_finest_level")]
+formatted_data <- apply(sikkema_meta, 1, function(row) {   
+  paste0("level1: ", row[1], ", level2: ", row[2], ", level3: ", row[3], 
+         ", level4: ", row[4], ", level5: ", row[5], ", finest_level: ", row[6]) 
+})
+
+# Convert the formatted data to a data frame (optional but makes it easier to work with).
+formatted_data <- data.frame(formatted_data)
+
+# Add a new column 'pathString' by concatenating non-NA values for each row with '/'
+sikkema_meta$pathString <- apply(sikkema_meta, 1, function(row) {   
+  paste(na.omit(row), collapse = "/")  # Concatenate non-NA values with "/"
+})
+
+#Convert cell level hierarchy into graph.
+hierarchy_tree <- as.Node(sikkema_meta)
+tree_graph <- ToDiagrammeRGraph(hierarchy_tree)
+tree_graph <- DiagrammeR::add_global_graph_attrs(
+  graph = tree_graph,
+  attr = "rankdir",
+  value = "LR",   # 'LR' stands for Left-to-Right layout
+  attr_type = "graph"
+)
+tree_graph <- DiagrammeR::add_global_graph_attrs(
+  graph = tree_graph,
+  attr = "fontsize",
+  value = "30",   # Adjust the font size (default is usually smaller)
+  attr_type = "node"
+)
+
+# Render the left-to-right tree plot and export to pdf.
+DiagrammeR::export_graph(
+  tree_graph,
+  file_name = "../data//hierarchical_dendrogram_v3.pdf",  # specify file name
+  file_type = "pdf"
+)
+ 
+
+# ------------------------------------------------------------------------------------------------
 # EDF 3
 # ------------------------------------------------------------------------------------------------
 
