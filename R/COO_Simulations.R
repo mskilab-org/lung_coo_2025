@@ -1,4 +1,11 @@
-## EDF 7 -- Univariate ##
+## The code below runs the simulations which were used for the plots of extended data figures 6 and 7.
+## For figure 6, only the univariate simulation code is used, with a fixed TMB of 2430 and 1000 iterations.
+## To run said code make sure to comment line 44 below and uncomment line 47. The number of iterations for that single TMB can be changed in line 53.
+## For figure 7, both univariate and multivariate code is used, with a variable TMB. The code can be ran without modifications for this approach.
+## Note that this code assumes that it is being run within the R folder of this repository. If it isn't, make sure to adjust the file paths on lines 14 and 171 so the GRanges used for
+## for the simulations (located in the data folder) are loaded correctly.
+
+## Univariate Simulations ##
 #Load libraries.
 library(skitools)
 library(MASS)
@@ -37,10 +44,13 @@ simCent.dt.gr = dt2gr(simCent.dt_nw)
 epicells = range_Cells
 juan.genes.gr.nw$simavgexpr = apply(mcols(simCent.dt.gr)[, colnames(mcols(simCent.dt.gr)) %in% epicells],1,mean)
 
-#Set range of TMB values for simulation.
+#Set range of TMB values for simulation. 
 rval = c(seq(1000, 3000, by = 100),seq(10, 90, by = 10),seq(1,9,1))
+#If only 1 single range is needed (e.g. like for extended data figure 6) then generate a 1 element long vector with the same value below. Uncomment the line below and comment the one above.
+#rval = c(2430)
 
-#For each value in rval (i.e.: for each TMB value), we run 100 iterations of the simulation.
+#For each value in rval (i.e.: for each TMB value), we run 100 iterations of the simulation. The number of iterations can be changed in line 49. If recreating extended data figure 6 set the number
+#of iterations in the mclapply to 1000.
 for(i in 1:length(rval))
 {
  rval1 = rval[i]
@@ -151,7 +161,7 @@ replacement_value = data.table(thisCell="Deuterosomal",allOverlap="No_Overlap")
 
 }
 
-## EDF 7 -- Multivariate ##
+## Multivariate Simulations ##
 #Load libraries.
 library(skitools)
 library(MASS)
