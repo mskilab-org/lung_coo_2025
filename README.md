@@ -15,12 +15,12 @@ The repository is composed of 2 folders: `data` and `R`, which contain the files
 
 ## Data Files
 
-- The `data` folder contains all files required for generating the manuscript figures. For specifics of which folder is required for which figure panel, please refer to the code for said panel in the `R` folder.
+- The `data` folder contains all files required for generating the manuscript figures. For specifics of which files are required for which figure panel, please refer to the code for said panel in the `R` folder.
 - This folder also contains the html file with the code and output of all panels, which can be generated again via `RMDKnit.R` (see above).
 
 # Running Instructions
 
-As mentioned above, all code panels can be ran independently of one another. _To run the code as is without having to deal with path issues, please set the `R` as working directory_, as all paths within the code files use the syntaxis to `../data/` when looking for their associated data files to load. However, note that individual paths can be modified within a given panel code with no problem (as long as the data files are loaded the panel code runs correctly).
+As mentioned above, all code panels can be ran independently of one another. _To run the code as is without having to deal with path issues, please set the `R` folder as working directory_, as all paths within the code files use the syntaxis to `../data/` when looking for their associated data files to load. However, note that individual paths can be modified within a given panel code with no problem (as long as the data files are loaded the panel code runs correctly).
 
 ## Session Information
 
