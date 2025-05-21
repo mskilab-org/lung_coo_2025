@@ -7,8 +7,8 @@
 #' @param params is a list with the parameters to be passed to the RMD. There're only 2 parameters: set_title, which indicates the title to be given to the html, and fileLoc, which indicates where to find the data files used in the generation of the figures (by default the data directory).
 workingDir = dirname(getwd())
 rmarkdown::render(
-        input = normalizePath(file.path(workingDir,"data","scLungFigures.rmd")),
+        input = normalizePath(file.path(workingDir,"R/scLung_Figures.rmd")),
         output_format = "html_document",
-        output_file = normalizePath(file.path(workingDir,"data","scLungFigures.html")),
+        output_file = normalizePath(file.path(workingDir,"data","scLung_Figures.html")),
         knit_root_dir = normalizePath(file.path(workingDir,"data"),
-        params = list(set_title = "Paper Figures",fileLoc = normalizePath(file.path(workingDir,"data")),quiet = FALSE)
+        params = list(set_title = "scLung Manuscript Figures",fileLoc = normalizePath(file.path(workingDir,"data")),quiet = FALSE)
