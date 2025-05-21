@@ -41,3 +41,5 @@ This code was created and tested using R version 4.3.3.
 `XVector_0.42.0`              `SummarizedExperiment_1.32.0`      `Biobase_2.62.0`              `MatrixGenerics_1.14.0`      
 `matrixStats_1.5.0`           `ComplexHeatmap_2.18.0`      `GenomicRanges_1.54.1`        `GenomeInfoDb_1.38.1`        
 `IRanges_2.36.0`              `S4Vectors_0.40.2`           `BiocGenerics_0.48.1` 
+
+- To check which libraries are loaded for which panels, refer to the code for said panel in the `R` folder.
