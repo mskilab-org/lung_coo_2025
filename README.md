@@ -29,27 +29,27 @@ This code was created and tested using R version 4.3.3.
 
 - Non-base packages, with their associated versions, are listed below:
 
-DiagrammeR_1.0.11           data.tree_1.1.0            
-circlize_0.4.16             Seurat_5.0.0               
-SeuratObject_5.0.2          sp_2.1-1                   
-EnhancedVolcano_1.20.0      ggrepel_0.9.4              
-RColorBrewer_1.1-3          ggforce_0.4.2              
-ggpubr_0.6.0                forcats_1.0.0              
-effects_4.2-2               carData_3.0-5              
-ggsankey_0.0.99999          ggalluvial_0.12.5          
-readxl_1.4.3                wesanderson_0.3.7          
-plyr_1.8.9                  skidb_0.1                  
-MASS_7.3-60                 dplyr_1.1.4                
-skitools_0.0.0.9000         igraph_2.1.4               
-reshape2_1.4.4              plotly_4.10.4              
-ggplot2_3.5.1               stringr_1.5.1              
-gUtils_0.2.0                data.table_1.17.0          
-devtools_2.4.5              usethis_3.1.0              
-htmlwidgets_1.6.4           VariantAnnotation_1.46.0   
-Rsamtools_2.16.0            Biostrings_2.68.1          
-XVector_0.42.0              SummarizedExperiment_1.32.0
-Biobase_2.62.0              MatrixGenerics_1.14.0      
-matrixStats_1.5.0           ComplexHeatmap_2.18.0      
-GenomicRanges_1.54.1        GenomeInfoDb_1.38.1        
-IRanges_2.36.0              S4Vectors_0.40.2           
-BiocGenerics_0.48.1 
+`DiagrammeR_1.0.11`           `data.tree_1.1.0`        
+`circlize_0.4.16`            `Seurat_5.0.0`               
+`SeuratObject_5.0.2`          `sp_2.1-1`                   
+`EnhancedVolcano_1.20.0`      `ggrepel_0.9.4`              
+`RColorBrewer_1.1-3`          `ggforce_0.4.2`              
+`ggpubr_0.6.0`                `forcats_1.0.0`              
+`effects_4.2-2`               `carData_3.0-5              
+`ggsankey_0.0.99999`          `ggalluvial_0.12.5`          
+`readxl_1.4.3`                `wesanderson_0.3.7`          
+`plyr_1.8.9`                  `skidb_0.1`                  
+`MASS_7.3-60`                 `dplyr_1.1.4`                
+`skitools_0.0.0.9000`         `igraph_2.1.4`               
+`reshape2_1.4.4`              `plotly_4.10.4`              
+`ggplot2_3.5.1`               `stringr_1.5.1`              
+`gUtils_0.2.0`                `data.table_1.17.0`          
+`devtools_2.4.5`              `usethis_3.1.0`              
+`htmlwidgets_1.6.4`           `VariantAnnotation_1.46.0`   
+`Rsamtools_2.16.0`            `Biostrings_2.68.1`          
+`XVector_0.42.0`              `SummarizedExperiment_1.32.0`
+`Biobase_2.62.0`              `MatrixGenerics_1.14.0`      
+`matrixStats_1.5.0`           `ComplexHeatmap_2.18.0`      
+`GenomicRanges_1.54.1`        `GenomeInfoDb_1.38.1`        
+`IRanges_2.36.0`              `S4Vectors_0.40.2`           
+`BiocGenerics_0.48.1` 
