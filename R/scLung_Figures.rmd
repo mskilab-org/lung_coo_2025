@@ -6,8 +6,8 @@ output:
     toc_float: true
     theme: flatly
 params:
-  set_title: "My Title!"
-  fileLoc: "/gpfs/commons/groups/imielinski_lab/projects/scLung/db/scLung_RMDFiles/"
+  set_title: "ScLung Manuscript Figures"
+  fileLoc: "../data"
 ---
 
 <style>
