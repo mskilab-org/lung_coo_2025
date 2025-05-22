@@ -6,8 +6,8 @@ output:
     toc_float: true
     theme: flatly
 params:
-  set_title: "ScLung Manuscript Figures"
-  fileLoc: "../data"
+  set_title: "My Title!"
+  fileLoc: "/gpfs/commons/groups/imielinski_lab/projects/scLung/db/scLung_RMDFiles/"
 ---
 
 <style>
@@ -1496,6 +1496,16 @@ library(data.tree)
 #Load sikkema metadata table. Format data so that each row represents a full hierarchy for a given celltype.
 sikkema_meta = read.table(file.path(params$fileLoc,"sikk_meta_epi.csv"),header=T,sep=",")
 sikkema_meta = sikkema_meta[,c("ann_level_1","ann_level_2","ann_level_3","ann_level_4","ann_finest_level")]
+
+#Adjust AT0 annotation to conform with Alveolar annotation.
+sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_2 = "Alveolar epithelium"
+sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_3 = "AT2"
+sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_4 = "AT0"
+
+#Populate AT1 and AT2 annotations for level 3 (i.e.: replace curent None value with the cell name).
+sikkema_meta[sikkema_meta$ann_finest_level=="AT2",]$ann_level_4 = "AT2"
+sikkema_meta[sikkema_meta$ann_finest_level=="AT1",]$ann_level_4 = "AT1"
+
 formatted_data <- apply(sikkema_meta, 1, function(row) {   
   paste0("level1: ", row[1], ", level2: ", row[2], ", level3: ", row[3], 
          ", level4: ", row[4], ", level5: ", row[5], ", finest_level: ", row[6]) 
