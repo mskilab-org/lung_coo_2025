@@ -482,6 +482,322 @@ p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color =
   )
 
 print(p)
+
+# ------------------------------------------------------------------------------------------------
+# EDF 5A
+# ------------------------------------------------------------------------------------------------
+
+#Load libraries
+library(skitools)
+
+#Load GRanges with mutational counts per patient.
+#The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
+dt1 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExpr.rds")
+dt2 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt = dt2gr(rbind(dt1,dt2,dt3))
+
+#Gather columns with tobacco counts per patient. Save with pair ID as data.table.
+count.int = grep("snv.tob.count.", colnames(mcols(dt)), value = TRUE)
+count.int = as.data.frame(count.int)
+count.int$pair = gsub("snv.tob.count.","",count.int$count.int)
+count.int$pair = toupper(count.int$pair)
+
+#Load list of luad_pairs. 
+luad_pairs = readRDS("../data/new.pairs.luad.rds")
+juan.genes.dt = gr2dt(dt)
+juan.genes.dt = as.data.frame(juan.genes.dt)
+
+#Filter GRanges for luad pairs. Gather sum of tobacco mutations per gene for LUADs.
+LUAD_patnt_mat = intersect(luad_pairs,count.int$pair)
+LUAD_patnt_mat = as.matrix(LUAD_patnt_mat)
+LUAD_patnt_mat = LUAD_patnt_mat[complete.cases(LUAD_patnt_mat),]
+count.int.mat = count.int[match(LUAD_patnt_mat,count.int$pair),]
+juan.genes.dt_nw = juan.genes.dt[,match(count.int.mat$count.int,colnames(juan.genes.dt))]
+snv_count = as.matrix(rowSums(juan.genes.dt_nw))
+juan_dt1 = juan.genes.dt[,1:6]
+juan_dt1$snv.count = snv_count
+colnames(juan_dt1)[7] = "snv.count"
+
+#Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
+sikk.cent = readRDS("../data/epcells.rds")
+sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
+sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
+juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
+colnames(juan_dt2)[7] = "snv.count"
+colnames(juan_dt2)[8] = "exp"
+
+#Compute expression quantiles for the gene expression distribution, and assign quantile information for each gene.
+ep.quant <- quantile(juan_dt2$exp)
+sikk_ep <- juan_dt2$exp %>% as.data.frame()
+colnames(sikk_ep)[1] = 'Epcells'
+sikk_ep$gene <- juan_dt2$gene_name
+lowep.quant <- sikk_ep[which(sikk_ep$Epcells <= -6.810384), ]
+midep.quant <- sikk_ep[which(sikk_ep$Epcells > -6.810384  & sikk_ep$Epcells <= -5.882191) , ]
+highep.quant <- sikk_ep[which(sikk_ep$Epcells > -5.882191) , ]
+lowep.quant$Quart = 'Q1'
+midep.quant$Quart = 'Q2'
+highep.quant$Quart = 'Q3'
+ep.quart.mat <- rbind(lowep.quant,midep.quant,highep.quant)
+
+#Per expression quantile (Q1, Q2, and Q3), compute mean and standard deviation of gene mutational density. 
+juan_dt2$densityLUAD <- (10**6)*juan_dt2$snv.count/(juan_dt2$width*246)
+epLUAD_centwrtTMB = ep.quart.mat[match(juan_dt2$gene_name,ep.quart.mat$gene),]
+epLUAD_centwrtTMB = epLUAD_centwrtTMB[complete.cases(epLUAD_centwrtTMB),]  # remove NAs
+ep.luadmat = cbind(epLUAD_centwrtTMB,juan_dt2$densityLUAD)
+colnames(ep.luadmat)[[4]] = "densityLUAD"
+ep.luadmat.Q1 = ep.luadmat[which(ep.luadmat$Quart=="Q1"),]
+ep.luadmat.Q1mean = mean(ep.luadmat.Q1$densityLUAD)
+ep.luadmat.Q1se = sd(ep.luadmat.Q1$densityLUAD)/sqrt(length(ep.luadmat.Q1$densityLUAD)) 
+ep.luadmat.Q2 = ep.luadmat[which(ep.luadmat$Quart=="Q2"),]
+ep.luadmat.Q2mean = mean(ep.luadmat.Q2$densityLUAD)
+ep.luadmat.Q2se = sd(ep.luadmat.Q2$densityLUAD)/sqrt(length(ep.luadmat.Q2$densityLUAD))
+ep.luadmat.Q3 = ep.luadmat[which(ep.luadmat$Quart=="Q3"),]
+ep.luadmat.Q3mean = mean(ep.luadmat.Q3$densityLUAD)
+ep.luadmat.Q3se = sd(ep.luadmat.Q3$densityLUAD)/sqrt(length(ep.luadmat.Q3$densityLUAD))
+mean_ep_mat = as.data.frame(rbind(ep.luadmat.Q1mean,ep.luadmat.Q2mean,ep.luadmat.Q3mean))
+se_ep_mat = as.data.frame(rbind(ep.luadmat.Q1se,ep.luadmat.Q2se,ep.luadmat.Q3se))
+Q1.quart = "Q1"
+Q2.quart = "Q2"
+Q3.quart = "Q3"
+
+#Generate new data.frame with mean and sd of mutational density per quantile.
+quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
+ep.mean.mat = cbind(quart.mat,mean_ep_mat,se_ep_mat)
+rownames(ep.mean.mat) = c(1,2,3)
+colnames(ep.mean.mat) = c("Quart","Mean_TMB","SE")
+ep.mean.mat$celltype="SBS4"
+
+#Generate plot of mutational density per expression quantile.
+mean.mat.luad = ep.mean.mat
+mean.mat.luad$celltype = as.factor(mean.mat.luad$celltype)
+p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color = celltype)) + 
+  geom_point(size = 4) + 
+  geom_line(size = 1.2) +
+  geom_errorbar(aes(ymin = Mean_TMB - SE, ymax = Mean_TMB + SE), width = 0.2, size = 0.9, color = 'black') +
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent'),
+    legend.box.background = element_rect(fill = 'transparent')
+  )+ labs(x = "Expression", y = "Mean TMB for tobacco")+ theme(legend.position = "none")
+
+print(p)
+
+
+# ------------------------------------------------------------------------------------------------
+# EDF 5B
+# ------------------------------------------------------------------------------------------------
+
+#Load libraries
+library(skitools)
+
+#Load GRanges with mutational counts per patient.
+#The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
+dt1 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExpr.rds")
+dt2 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt = dt2gr(rbind(dt1,dt2,dt3))
+
+#Gather columns with aging counts per patient. Save with pair ID as data.table.
+count.int = grep("snv.aging.count.", colnames(mcols(dt)), value = TRUE)
+count.int = as.data.frame(count.int)
+count.int$pair = gsub("snv.aging.count.","",count.int$count.int)
+count.int$pair = toupper(count.int$pair)
+
+#Load list of luad_pairs. 
+luad_pairs = readRDS("../data/scLung_RMDFiles/new.pairs.luad.rds")
+juan.genes.dt = gr2dt(dt)
+juan.genes.dt = as.data.frame(juan.genes.dt)
+
+#Filter GRanges for luad pairs. Gather sum of tobacco mutations per gene for LUADs.
+LUAD_patnt_mat = intersect(luad_pairs,count.int$pair)
+LUAD_patnt_mat = as.matrix(LUAD_patnt_mat)
+LUAD_patnt_mat = LUAD_patnt_mat[complete.cases(LUAD_patnt_mat),]
+count.int.mat = count.int[match(LUAD_patnt_mat,count.int$pair),]
+juan.genes.dt_nw = juan.genes.dt[,match(count.int.mat$count.int,colnames(juan.genes.dt))]
+snv_count = as.matrix(rowSums(juan.genes.dt_nw))
+juan_dt1 = juan.genes.dt[,1:6]
+juan_dt1$snv.count = snv_count
+colnames(juan_dt1)[7] = "snv.count"
+
+#Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
+sikk.cent = readRDS("../data/epcells.rds")
+sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
+sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
+juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
+colnames(juan_dt2)[7] = "snv.count"
+colnames(juan_dt2)[8] = "exp"
+
+#Compute expression quantiles for the gene expression distribution, and assign quantile information for each gene.
+ep.quant <- quantile(juan_dt2$exp)
+sikk_ep <- juan_dt2$exp %>% as.data.frame()
+colnames(sikk_ep)[1] = 'Epcells'
+sikk_ep$gene <- juan_dt2$gene_name
+lowep.quant <- sikk_ep[which(sikk_ep$Epcells <= -6.810384), ]
+midep.quant <- sikk_ep[which(sikk_ep$Epcells > -6.810384  & sikk_ep$Epcells <= -5.882191) , ]
+highep.quant <- sikk_ep[which(sikk_ep$Epcells > -5.882191) , ]
+lowep.quant$Quart = 'Q1'
+midep.quant$Quart = 'Q2'
+highep.quant$Quart = 'Q3'
+ep.quart.mat <- rbind(lowep.quant,midep.quant,highep.quant)
+
+#Per expression quantile (Q1, Q2, and Q3), compute mean and standard deviation of gene mutational density. 
+juan_dt2$densityLUAD <- (10**6)*juan_dt2$snv.count/(juan_dt2$width*246)
+epLUAD_centwrtTMB = ep.quart.mat[match(juan_dt2$gene_name,ep.quart.mat$gene),]
+epLUAD_centwrtTMB = epLUAD_centwrtTMB[complete.cases(epLUAD_centwrtTMB),]  # remove NAs
+ep.luadmat = cbind(epLUAD_centwrtTMB,juan_dt2$densityLUAD)
+colnames(ep.luadmat)[[4]] = "densityLUAD"
+ep.luadmat.Q1 = ep.luadmat[which(ep.luadmat$Quart=="Q1"),]
+ep.luadmat.Q1mean = mean(ep.luadmat.Q1$densityLUAD)
+ep.luadmat.Q1se = sd(ep.luadmat.Q1$densityLUAD)/sqrt(length(ep.luadmat.Q1$densityLUAD)) 
+ep.luadmat.Q2 = ep.luadmat[which(ep.luadmat$Quart=="Q2"),]
+ep.luadmat.Q2mean = mean(ep.luadmat.Q2$densityLUAD)
+ep.luadmat.Q2se = sd(ep.luadmat.Q2$densityLUAD)/sqrt(length(ep.luadmat.Q2$densityLUAD))
+ep.luadmat.Q3 = ep.luadmat[which(ep.luadmat$Quart=="Q3"),]
+ep.luadmat.Q3mean = mean(ep.luadmat.Q3$densityLUAD)
+ep.luadmat.Q3se = sd(ep.luadmat.Q3$densityLUAD)/sqrt(length(ep.luadmat.Q3$densityLUAD))
+mean_ep_mat = as.data.frame(rbind(ep.luadmat.Q1mean,ep.luadmat.Q2mean,ep.luadmat.Q3mean))
+se_ep_mat = as.data.frame(rbind(ep.luadmat.Q1se,ep.luadmat.Q2se,ep.luadmat.Q3se))
+Q1.quart = "Q1"
+Q2.quart = "Q2"
+Q3.quart = "Q3"
+
+#Generate new data.frame with mean and sd of mutational density per quantile.
+quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
+ep.mean.mat = cbind(quart.mat,mean_ep_mat,se_ep_mat)
+rownames(ep.mean.mat) = c(1,2,3)
+colnames(ep.mean.mat) = c("Quart","Mean_TMB","SE")
+ep.mean.mat$celltype="Aging"
+
+#Generate plot of mutational density per expression quantile.
+mean.mat.luad = ep.mean.mat
+mean.mat.luad$celltype = as.factor(mean.mat.luad$celltype)
+p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color = celltype)) + 
+  geom_point(size = 4) + 
+  geom_line(size = 1.2) +
+  geom_errorbar(aes(ymin = Mean_TMB - SE, ymax = Mean_TMB + SE), width = 0.2, size = 0.9, color = 'black') +
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent'),
+    legend.box.background = element_rect(fill = 'transparent')
+  )+ labs(x = "Expression", y = "Mean TMB for aging")+ theme(legend.position = "none")
+
+print(p)
+
+# ------------------------------------------------------------------------------------------------
+# EDF 5C
+# ------------------------------------------------------------------------------------------------
+
+#Load libraries
+library(skitools)
+
+#Load GRanges with mutational counts per patient.
+#The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
+dt1 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExpr.rds")
+dt2 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt = dt2gr(rbind(dt1,dt2,dt3))
+
+#Gather columns with apobec counts per patient. Save with pair ID as data.table.
+count.int = grep("snv.apobec.count.", colnames(mcols(dt)), value = TRUE)
+count.int = as.data.frame(count.int)
+count.int$pair = gsub("snv.apobec.count.","",count.int$count.int)
+count.int$pair = toupper(count.int$pair)
+
+#Load list of luad_pairs. 
+luad_pairs = readRDS("../data/new.pairs.luad.rds")
+juan.genes.dt = gr2dt(dt)
+juan.genes.dt = as.data.frame(juan.genes.dt)
+
+#Filter GRanges for luad pairs. Gather sum of tobacco mutations per gene for LUADs.
+LUAD_patnt_mat = intersect(luad_pairs,count.int$pair)
+LUAD_patnt_mat = as.matrix(LUAD_patnt_mat)
+LUAD_patnt_mat = LUAD_patnt_mat[complete.cases(LUAD_patnt_mat),]
+count.int.mat = count.int[match(LUAD_patnt_mat,count.int$pair),]
+juan.genes.dt_nw = juan.genes.dt[,match(count.int.mat$count.int,colnames(juan.genes.dt))]
+snv_count = as.matrix(rowSums(juan.genes.dt_nw))
+juan_dt1 = juan.genes.dt[,1:6]
+juan_dt1$snv.count = snv_count
+colnames(juan_dt1)[7] = "snv.count"
+
+#Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
+sikk.cent = readRDS("../data/epcells.rds")
+sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
+sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
+juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
+colnames(juan_dt2)[7] = "snv.count"
+colnames(juan_dt2)[8] = "exp"
+
+#Compute expression quantiles for the gene expression distribution, and assign quantile information for each gene.
+ep.quant <- quantile(juan_dt2$exp)
+sikk_ep <- juan_dt2$exp %>% as.data.frame()
+colnames(sikk_ep)[1] = 'Epcells'
+sikk_ep$gene <- juan_dt2$gene_name
+lowep.quant <- sikk_ep[which(sikk_ep$Epcells <= -6.810384), ]
+midep.quant <- sikk_ep[which(sikk_ep$Epcells > -6.810384  & sikk_ep$Epcells <= -5.882191) , ]
+highep.quant <- sikk_ep[which(sikk_ep$Epcells > -5.882191) , ]
+lowep.quant$Quart = 'Q1'
+midep.quant$Quart = 'Q2'
+highep.quant$Quart = 'Q3'
+ep.quart.mat <- rbind(lowep.quant,midep.quant,highep.quant)
+
+#Per expression quantile (Q1, Q2, and Q3), compute mean and standard deviation of gene mutational density. 
+juan_dt2$densityLUAD <- (10**6)*juan_dt2$snv.count/(juan_dt2$width*246)
+epLUAD_centwrtTMB = ep.quart.mat[match(juan_dt2$gene_name,ep.quart.mat$gene),]
+epLUAD_centwrtTMB = epLUAD_centwrtTMB[complete.cases(epLUAD_centwrtTMB),]  # remove NAs
+ep.luadmat = cbind(epLUAD_centwrtTMB,juan_dt2$densityLUAD)
+colnames(ep.luadmat)[[4]] = "densityLUAD"
+ep.luadmat.Q1 = ep.luadmat[which(ep.luadmat$Quart=="Q1"),]
+ep.luadmat.Q1mean = mean(ep.luadmat.Q1$densityLUAD)
+ep.luadmat.Q1se = sd(ep.luadmat.Q1$densityLUAD)/sqrt(length(ep.luadmat.Q1$densityLUAD)) 
+ep.luadmat.Q2 = ep.luadmat[which(ep.luadmat$Quart=="Q2"),]
+ep.luadmat.Q2mean = mean(ep.luadmat.Q2$densityLUAD)
+ep.luadmat.Q2se = sd(ep.luadmat.Q2$densityLUAD)/sqrt(length(ep.luadmat.Q2$densityLUAD))
+ep.luadmat.Q3 = ep.luadmat[which(ep.luadmat$Quart=="Q3"),]
+ep.luadmat.Q3mean = mean(ep.luadmat.Q3$densityLUAD)
+ep.luadmat.Q3se = sd(ep.luadmat.Q3$densityLUAD)/sqrt(length(ep.luadmat.Q3$densityLUAD))
+mean_ep_mat = as.data.frame(rbind(ep.luadmat.Q1mean,ep.luadmat.Q2mean,ep.luadmat.Q3mean))
+se_ep_mat = as.data.frame(rbind(ep.luadmat.Q1se,ep.luadmat.Q2se,ep.luadmat.Q3se))
+Q1.quart = "Q1"
+Q2.quart = "Q2"
+Q3.quart = "Q3"
+
+#Generate new data.frame with mean and sd of mutational density per quantile.
+quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
+ep.mean.mat = cbind(quart.mat,mean_ep_mat,se_ep_mat)
+rownames(ep.mean.mat) = c(1,2,3)
+colnames(ep.mean.mat) = c("Quart","Mean_TMB","SE")
+ep.mean.mat$celltype="Apobec"
+
+#Generate plot of mutational density per expression quantile.
+mean.mat.luad = ep.mean.mat
+mean.mat.luad$celltype = as.factor(mean.mat.luad$celltype)
+p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color = celltype)) + 
+  geom_point(size = 4) + 
+  geom_line(size = 1.2) +
+  geom_errorbar(aes(ymin = Mean_TMB - SE, ymax = Mean_TMB + SE), width = 0.2, size = 0.9, color = 'black') +
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent'),
+    legend.box.background = element_rect(fill = 'transparent')
+  )+ labs(x = "Expression", y = "Mean TMB for apobec")+ theme(legend.position = "none")
+
+print(p)
                                                                              
 # ------------------------------------------------------------------------------------------------
 # EDF 6A
