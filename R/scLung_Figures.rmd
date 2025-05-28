@@ -2650,6 +2650,7 @@ p <- ggplot(tmp.plot, aes(x, y, colour = color), size = 3) +
   scale_colour_identity()
 print(p)
 ```
+
 ## Extended Data Figure 10B
 ```{r, extfig10B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 library(skitools)
