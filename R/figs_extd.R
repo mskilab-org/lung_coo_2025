@@ -800,7 +800,7 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
                                                                              
 # ------------------------------------------------------------------------------------------------
-# EDF 6A
+# EDF 6
 # ------------------------------------------------------------------------------------------------
 
 # Accuracy for predicting true cell type at different levels 
