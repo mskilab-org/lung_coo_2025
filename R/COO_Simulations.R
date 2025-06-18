@@ -12,7 +12,7 @@ library(MASS)
 library(parallel)
 
 #Load GRanges file with genomic covariates and centroids.
-juan.genes.gr.nw = readRDS("../data/edf7_genes_gr_LUAD.rds")
+juan.genes.gr.nw = readRDS("../data/Simulations/Sims_genes_gr_LUAD.rds")
 juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
 #Define cells for simulation (epithelial cells).
 range_Cells = c("AT1","AT2","AT2 proliferating","AT0","Suprabasal","Basal resting","Hillock-like","Multiciliated (non-nasal)","Multiciliated (nasal)","Deuterosomal","Neuroendocrine","Ionocyte","Tuft","Goblet (nasal)","Club (nasal)","Club (non-nasal)","pre-TB secretory","Goblet (bronchial)","Goblet (subsegmental)","SMG serous (bronchial)","SMG mucous","SMG duct","SMG serous (nasal)")
