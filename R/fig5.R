@@ -5,7 +5,7 @@ library(parallel)
 library(MASS)
 
 #Load csv with relative risk information per centroid for every sample.
-rel_risk = read.table("../Fig5B_luad_rel_risk.csv",sep=",",header=T,row.names=1)
+rel_risk = read.table("../data/Fig5/5B_luad_rel_risk.csv"),sep=",",header=T,row.names=1)
 
 #Group samples based on Distal, Proximal, or Ambiguous COO calls. Compute mean relative risk for each.
 #Distal
@@ -31,7 +31,7 @@ ambi_ep_mean = as.data.frame(ambi_ep_mean)
 ambi_ep_mean$celltype = rownames(ambi_ep_mean)
 
 #Load WCM-1 GLM output. Get vector with relative risks per centroid.
-wcm = readRDS("../data/Fig5B_cov_res.rds")
+wcm = readRDS("../data/Fig5/5B_cov_res.rds"))
 wcm_mat = wcm[,c("celltype","estimate")]
 wcm_mat = as.data.frame(wcm_mat)
 rownames(wcm_mat) = wcm_mat$celltype
@@ -47,16 +47,18 @@ ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate)
 distances = c(distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate),
               prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate),
               ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate))
-#Results are saved in the distances data.frame object (figure was manually maded based on this object).
+
+#Results are saved in the distances data.frame object (figure was manually made based on this object).
 distances = as.data.frame(distances)
 distances$Vector = rownames(distances)
+DT::datatable(distances, options = list(scrollX = TRUE), caption = "Distances Table")
 
 ## Fig 5B Right Panel ##
 #Load libraries
 library(skitools)
 
 #Load GLM output for WCM-1.
-dt.plot = readRDS("../data/Fig5B_cov_res.rds")
+dt.plot = readRDS("../data/Fig5/5B_cov_res.rds"))
 dt.plot$Cell_Type = dt.plot$celltype
 dt.plot$tumor.type = "LUAD"
 
@@ -69,8 +71,7 @@ dt.plot$ci.upper = dt.plot$ci.upper - 1
 in.pattern.tt = c('LUAD')
 in.pattern.snv = "snv.count"
 
-ppdf(
-  for (ik in in.pattern.tt)
+for (ik in in.pattern.tt)
   {
     message('\nPlotting mutational density for: ', ik, ' samples')
 #Filter for any cancer type, celltype, or snv column if needed.     
@@ -80,7 +81,6 @@ ppdf(
     dt.plot.sub = dt.plot[tumor.type %in% ik & celltype %in% in.ct.sub & tt %in% in.count.sub,]
 #Order results by relative risk (lower to higher).         
     setorder(dt.plot.sub,celltype)
-    print(dt.plot.sub)
     in.title = unique(gsub(" - .*","",dt.plot.sub$combination.formal))
 # Set upper and lower limits for plot (x axis).
     in.axis.breaks = 0.05
@@ -100,13 +100,13 @@ ppdf(
       theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) +
       coord_flip()
     print(p)
-  }, file= "Fig_5BRight.pdf",cex = c(0.95,1.25))
+}
 
 ## Fig 5C ##
 #Load libraries. 
 library(skitools)
 #Load file with umap of cancer cells output. This allows for gathering WCM-1A and B cells. 
-tmp.plot = readRDS("../data/Fig5_tmp_plot_for_umap_fig5_knn6.rds")
+tmp.plot = readRDS("../data/Fig5/5CD_tmp_plot_for_umap_fig5_knn6.rds"))
 
 #Filter for WCM-1 cells, split in WCM-1 A and B based on their cluster numbers.
 tmp_plot_wcm = tmp.plot[which(tmp.plot$patient=="WCM-1"),]
@@ -118,7 +118,7 @@ wcm1a = wcm_clusters[which(wcm_clusters$type=="WCM-1-A"),]
 wcm1b = wcm_clusters[which(wcm_clusters$type=="WCM-1-B"),]
 
 #Load aneuploidy score output from CONICSmat.
-tmp_norm = readRDS("../data/Fig5C_anneuploidy_zscore.rds")
+tmp_norm = readRDS(file.path(params$fileLoc,"Fig5C_anneuploidy_zscore.rds"))
 tmp_norm = as.data.frame(tmp_norm)
 
 #Get aneuploidy score for WCM-1 cells.
@@ -132,14 +132,14 @@ tmp_norm_wcm = as.matrix(tmp_norm_wcm)
 #Generate heatmap annotation and then plot heatmap.
 row.ha = HeatmapAnnotation(Patient = wcm_clusters$type, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Patient = c("WCM-1-A"= "#00BA38", "WCM-1-B" = "#619CFF")), annotation_legend_param = list("WCM-1-A", "WCM-1-B"), which = "row")
 p = Heatmap(tmp_norm_wcm, name = 'z-score', cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold"))
-ppdf(print(p),filename="Fig5C.pdf")
+print(p)
 
 ## Fig 5D ##
 #Load libraries 
 library(skitools)
 
 #Load per cell identity labels. Remove cells with no identity.
-labels = read.table("../data/Fig5D_combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv",sep=",",header=TRUE)
+labels = read.table("../data/Fig5/5D_combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv",sep=",",header=TRUE)
 labels$ann_finest_lev_transferred_label_filtered = ifelse(labels$ann_finest_lev_transfer_uncert<0.5,labels$ann_finest_lev_transferred_label_unfiltered,"Unknown")
 
 #Define proximal and distal cell groupings.
@@ -149,7 +149,7 @@ cells = c(distal_sikk,rare_sikk)
 proximal_sikk = setdiff(labels$ann_finest_lev_transferred_label_filtered,cells)
 
 #Get WCM-1 A and B cells from the carcinoma cell UMAP  (same as for Fig 5C).
-tmp.plot = readRDS("../data/Fig5_tmp_plot_for_umap_fig5_knn6.rds")
+tmp.plot = readRDS(file.path(params$fileLoc,"Fig5/5CD_tmp_plot_for_umap_fig5_knn6.rds"))
 tmp_plot_wcm = tmp.plot[which(tmp.plot$patient=="WCM-1"),]
 wcm_clusters = tmp_plot_wcm[which(tmp_plot_wcm$cluster!=1),]
 wcm_clusters[which(wcm_clusters$cluster==2),"type"]="WCM-1-A"
@@ -194,15 +194,15 @@ p = ggplot(result, aes(x = factor(cat), y = percentage, fill = Var1)) +
        title = "Barplot of Percentage by Frequency and Pat") + 
   scale_fill_manual(values = combined_palette)+ylim(0,100)
 
-ppdf(print(p),filename="Fig5D.pdf")
+print(p)
 
 ##Fig 5E ##
-#load libraries
+#Load libraries
 library(skitools)
 library(EnhancedVolcano)
 
 #Load file with marker genes.
-seu.markers = readRDS("../data/Fig5E_seu_markers.rds")
+seu.markers = readRDS("../data/Fig5/5E_seu_markers.rds")
 
 #Filter for markers from WCM-1 A and B (based on their cluster number in the carcinoma cell umap).
 markers.1 = seu.markers[seu.markers$cluster == 2,]
@@ -223,4 +223,4 @@ p = EnhancedVolcano(seu.markers.mast.plot,
                     FCcutoff = 0.5,
                     labSize = 3, colAlpha = 1,
                     pointSize = 2)
-ppdf(print(p),filename="Fig5E.pdf" ,cex = 0.8)    
+print(p)
