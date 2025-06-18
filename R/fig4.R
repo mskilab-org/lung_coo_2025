@@ -1,10 +1,11 @@
+## Figure 4A ##
+
+#Load libraries.
 library(skitools)
 library(ggalluvial)
 library(wesanderson)
 
-# fig 4A
-
-pts_coo_id <- readRDS('../data/pts_coo_id.rds')
+pts_coo_id <- readRDS(file.path(params$fileLoc,'../data/Fig4/4A_pts_coo_id.rds'))
 pts_coo_id$Origin = factor(pts_coo_id$Origin, levels = c(  "Distal Lung_TP53 MUT", "Ambiguous_TP53 MUT", "Proximal Lung_TP53 MUT",  "Distal Lung_WT", "Ambiguous_WT", "Proximal Lung_WT"))
 pts_coo_id$Identity = factor(pts_coo_id$Identity, levels = c("Distal Lung", "Non-Distal Lung"))
 
@@ -20,13 +21,15 @@ ggplot(pts_coo_id,
   scale_fill_manual(values = c(wes_palettes$GrandBudapest2[4], wes_palettes$Chevalier1[1], wes_palettes$GrandBudapest2[3], wes_palettes$Chevalier1[2], wes_palettes$GrandBudapest2[2], wes_palettes$Chevalier1[3], wes_palettes$AsteroidCity3[1], wes_palettes$AsteroidCity1[1])) +
   ggtitle("Fig 4A - Origin --> Identity") + coord_flip()
 
+# Figure 4B ##
+#Load libraries.
+library(skitools)
+library(wesanderson)
 
-
-# Fig 4B
-
-pts_coo_id_4B <- readRDS( '../data/pts_coo_id_4B.rds')
+pts_coo_id_4B <- readRDS(file.path(params$fileLoc,'../data/Fig4/4B_pts_coo_id.rds'))
 
 res.plot =  pts_coo_id_4B[, prop.test(sum(Identity == 'Distal Lung'), .N) %>% dflm %>% cbind(nprox = sum(Identity == 'Distal Lung'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
+
 res.plot$Origin = factor(res.plot$Origin, levels = c('Non-Distal Lung','Distal Lung'))
 res.plot$TP53_mut = factor(res.plot$TP53_mut, levels = c('TP53 MUT','WT'))
 ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
@@ -43,4 +46,3 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = TP53_mut, y = ci.upper + 0.05, label = paste0(nprox, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = 'Fig 4B - Distal fraction')) + theme(legend.position = "bottom")
-
