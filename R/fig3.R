@@ -1,6 +1,8 @@
+## Figure 3A ##
+
+#Load libraries.
 library(skitools)
 library(data.table)
-library(skitools)
 library(skidb)
 library(plyr)
 library(dplyr)
@@ -10,18 +12,16 @@ library(readxl)
 library(ggalluvial)
 library(wesanderson)
 library(readxl)
-library(ggsankey)
+#library(ggsankey)
 library(effects)
 library(stats)
 library(forcats) 
 library(ggpubr)
 library(ggforce)
 
-mat.in.2 <- readRDS('../data/mat.in.2.rds')
-col_fun2 <- readRDS('../data/col_fun2.rds')
-# ------------------------------------------------------------------------------------------------
-# figure 3A
-# ------------------------------------------------------------------------------------------------
+mat.in.2 <- readRDS(file.path(params$fileLoc,'../data/Fig3/3A_mat.in.2.rds'))
+col_fun2 <- readRDS(file.path(params$fileLoc,'../data/Fig3/3A_col_fun2.rds'))
+
 column_ha3_1 = HeatmapAnnotation(
   Tobacco = anno_barplot(mat.in.2[mat.in.2$cluster_sk_non_apobec == 1,29], ylim = c(0, 200000), gp = gpar(col = "red", fill = "#FF0000") , axis = FALSE),
   ID3 = anno_barplot(mat.in.2[mat.in.2$cluster_sk_non_apobec == 1,32], ylim = c(0, 10000), gp = gpar(col = "#9900CC", fill = "#9900CC") , axis = FALSE) ,
@@ -93,8 +93,6 @@ column_ha3_3 = HeatmapAnnotation(
   show_annotation_name = FALSE
 )
 
-
-
 column_ha3_4 = HeatmapAnnotation(
   #snv = anno_barplot(mat.in.2[,26], gp = gpar(col = "black", fill = "#4575B4")),
   Tobacco = anno_barplot(mat.in.2[mat.in.2$cluster_sk_non_apobec == 4,29], ylim = c(0, 200000), gp = gpar(col = "red", fill = "#FF0000") , axis = FALSE),
@@ -144,13 +142,12 @@ ht4 <- Heatmap(t(mat.in.2[mat.in.2$cluster_sk_non_apobec == 4,2:24]), name = "HT
 ht_list =  ht2+ ht1 + ht3 + ht4 
 draw(ht_list, row_title = "Heatmap list", column_title = "Heatmap list")
 
+## Figure 3B ##
+#Load libraries.
+library(skitools)
 
-# ------------------------------------------------------------------------------------------------
-# figure 3B
-# ------------------------------------------------------------------------------------------------
 # Distal Lung
-
-fig3B_data <- readRDS('../data/fig3B_data.rds')
+fig3B_data <- readRDS(file.path(params$fileLoc,'../data/Fig3/3B_data.rds'))
 ggplot(fig3B_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
@@ -164,7 +161,6 @@ ggplot(fig3B_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = 
   ggtitle(paste0(in.title, 'LUAD - Cluster 1')) +
   theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
   coord_flip()
-
 # Ambiguous
 ggplot(fig3B_data[cluster == 'Ambiguous'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
@@ -179,9 +175,7 @@ ggplot(fig3B_data[cluster == 'Ambiguous'], aes(x = reorder(celltype,estimate), y
   ggtitle(paste0(in.title, 'LUAD - Cluster 2')) +
   theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
   coord_flip()
-
 # Proximal_1
-
 ggplot(fig3B_data[cluster == 'Proximal_1'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
@@ -195,9 +189,7 @@ ggplot(fig3B_data[cluster == 'Proximal_1'], aes(x = reorder(celltype,estimate), 
   ggtitle(paste0(in.title, 'LUAD - Cluster 3')) +
   theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
   coord_flip()
-
 # Proximal_2
-
 ggplot(fig3B_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
@@ -212,12 +204,12 @@ ggplot(fig3B_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
   theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
   coord_flip()
 
-# ------------------------------------------------------------------------------------------------
-# figure 3C
-# ------------------------------------------------------------------------------------------------
+## Figure 3C ##
+#Load libraries.
+library(skitools)
 
 # tmb
-extd_data_3 <- fread('../data/extd_data_3.csv'))
+extd_data_3 <- fread(file.path(params$fileLoc,'../data/Fig3/3CDE_extd_data_3.csv'))
 ik = 'tmb_75_pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -242,10 +234,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
-
 # Tobacco  
-extd_data_3 <- fread('../data/extd_data_3.csv')
 ik = 'Tobacco_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -276,9 +265,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # ID3
-
 ik = 'ID3_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -303,9 +290,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # Apobec
-
 ik = 'Apobec_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -330,9 +315,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # SBS1
-
 ik = 'SBS1_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -357,9 +340,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # SBS5
-
 ik = 'SBS5_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -384,9 +365,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # ID1
-
 ik = 'ID1_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -411,9 +390,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # ID12
-
 ik = 'ID12_75pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -439,10 +416,11 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
 
-# ------------------------------------------------------------------------------------------------
-# figure 3D
-# ------------------------------------------------------------------------------------------------
+## Figure 3D ##
+#Load libraries.
+library(skitools)
 
+extd_data_3 <- fread(file.path(params$fileLoc,'../data/Fig3/3CDE_extd_data_3.csv'))
 ik = 'Never_Smoker'
 freq.plot.tmp.f = extd_data_3[!is.na(CellOfOrigin)]
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -468,12 +446,12 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
 
-# ------------------------------------------------------------------------------------------------
-# figure 3E
-# ------------------------------------------------------------------------------------------------
+## Figure 3E ##
+#Load libraries.
+library(skitools)
 
 # KRAS
-
+extd_data_3 <- fread(file.path(params$fileLoc,'../data/Fig3/3CDE_extd_data_3.csv'))
 ik = 'KRAS'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -498,9 +476,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # TP53
-
 ik = 'TP53'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -525,9 +501,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # STK11
-
 ik = 'STK11'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -552,10 +526,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # EGFR
-
-
 ik = 'EGFR'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -580,9 +551,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
 # SMARCA4
-
 ik = 'SMARCA4'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -607,5 +576,3 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-
-
