@@ -34,7 +34,7 @@ seu@meta.data$seurat_clusters = clustDat
 
 #Generate the Dotplot.
 p = DotPlot(seu, features = rownames(expDat), group.by="seurat_clusters") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
-ppdf(print(p),filename="../data/Supp1A.pdf")
+print(p)
 
 
 # ------------------------------------------------------------------------------------------------
@@ -100,7 +100,7 @@ library(circlize)
 col_fun = colorRamp2(c(-10, 0, 10), c("blue", "white", "red"))
 #Plot heatmap.
 p = Heatmap(tmp.l.nw, name = 'z-score', col = col_fun, cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold")) + row.ha
-ppdf(print(p), cex = c(1,2),filename="../data/Supp1C.pdf")
+print(p)
 
 # ------------------------------------------------------------------------------------------------
 # EDF 2
