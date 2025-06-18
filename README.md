@@ -17,7 +17,7 @@ The repository is composed of 2 folders: `data` and `R`, which contain the files
 
 ## Data Files
 
-- The `data` folder contains all files required for generating the manuscript figures. For specifics of which files are required for which figure panel, please refer to the code for said panel in the `R` folder.
+- The `data` folder contains all files required for generating the manuscript figures, divided by Figure/Extended Figure. Note that for extended figures, there is a main  `EDF` folder, and then individual folders per extended figure within. For specifics of which files are required for which figure panel, please refer to the code for said panel in the `R` folder. 
 - This folder also contains the html file with the code and output of all panels, which can be generated again via `RMDKnit.R` (see above).
 
 # Running Instructions
