@@ -950,7 +950,9 @@ Heatmap(t(hm_lusc[,1:23]), name = "Relative Risk", col = nsclc_col, cluster_rows
 # ------------------------------------------------------------------------------------------------
 # EDF 8B
 # ------------------------------------------------------------------------------------------------
-
+#Load libraries.
+library(skitools)
+                                                                             
 # LUSC - Cluster 1 Distal Lung
 edf_8_data <- readRDS('../data/edf8.rds')
 ggplot(edf_8_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
@@ -1001,8 +1003,8 @@ ggplot(edf_8_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
 # ------------------------------------------------------------------------------------------------
 # EDF 9A
 # ------------------------------------------------------------------------------------------------
-
-
+#Load libraries.
+library(skitools)
 
 pts_coo_id_edf9a <- readRDS( '../data/pts_coo_id_4B.rds')
 pts_coo_id_edf9a$Lineage_plasticity <- ''
@@ -1033,6 +1035,9 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
 # ------------------------------------------------------------------------------------------------
 # EDF 9B
 # ------------------------------------------------------------------------------------------------
+#Load libraries.
+library(skitools)
+                     
 tmp.plot.luad.df3 <- readRDS('../data/edf9b.rds')
 
 tmp.plot.luad.pl <- ggplot(tmp.plot.luad.df3, aes(x = x,                        
@@ -1065,6 +1070,9 @@ tmp.plot.luad.pl
 # EDF 9C
 # ------------------------------------------------------------------------------------------------
 
+#Load libraries.
+library(skitools)
+                     
 edf9 <- readRDS('../data/edf9.rds')
 
 ik <-  'Papillary'
@@ -1112,6 +1120,9 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 # ------------------------------------------------------------------------------------------------
 # by Identity 
 
+#Load libraries.
+library(skitools)
+                     
 edf9 <- readRDS('../data/edf9.rds')
 
 ik <-  'NSCLC_NOS'
@@ -1155,8 +1166,10 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 # ------------------------------------------------------------------------------------------------
 # EDF 9E
 # ------------------------------------------------------------------------------------------------
+#Load libraries.
+library(skitools)
+                     
 # NSCLC-NOS vs TP53
-
 edf9 <- readRDS('../data/edf9.rds')
 
 ik <-  'NSCLC_NOS'
@@ -1196,9 +1209,10 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 # ------------------------------------------------------------------------------------------------
 # EDF 9F
 # ------------------------------------------------------------------------------------------------
-
+#Load libraries.
+library(skitools)
+                     
 edf9 <- readRDS('../data/edf9.rds')
-
 ik = 'mut_tp53_hist'
 freq.plot.tmp.f = edf9
 
@@ -1236,6 +1250,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 # ------------------------------------------------------------------------------------------------
 # EDF 9G
 # ------------------------------------------------------------------------------------------------
+#Load libraries.
 library(skitools)
 
 edf9g_a <- readRDS('../data/edf9g_a.rds')
@@ -1248,6 +1263,9 @@ oncoprint(edf9g_b, oncotab = edf9g_a,  genes = c('NKX2-1','SMARCA4','STK11','APC
 # ------------------------------------------------------------------------------------------------
 # EDF 10 A 
 # ------------------------------------------------------------------------------------------------
+#Load libraries.
+library(skitools)
+                     
 tmp.plot = readRDS("../data/edf10.rds")
 
 highlight_color <- "darkslategray3"  # Color for WCM-1
@@ -1265,8 +1283,11 @@ print(p)
 # ------------------------------------------------------------------------------------------------
 # EDF 10 B
 # ------------------------------------------------------------------------------------------------
+#Load libraries.
+library(skitools)
 library(RColorBrewer)
 
+tmp.plot = readRDS("../data/edf10.rds")                     
 my_colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(tmp.plot$cluster)))
 my_colors[1] <- 'turquoise4'
 my_colors[2] <- 'mediumseagreen'
