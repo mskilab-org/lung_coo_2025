@@ -5,7 +5,7 @@ library(skitools)
 library(ggalluvial)
 library(wesanderson)
 
-pts_coo_id <- readRDS(file.path(params$fileLoc,'../data/Fig4/4A_pts_coo_id.rds'))
+pts_coo_id <- readRDS('../data/Fig4/4A_pts_coo_id.rds')
 pts_coo_id$Origin = factor(pts_coo_id$Origin, levels = c(  "Distal Lung_TP53 MUT", "Ambiguous_TP53 MUT", "Proximal Lung_TP53 MUT",  "Distal Lung_WT", "Ambiguous_WT", "Proximal Lung_WT"))
 pts_coo_id$Identity = factor(pts_coo_id$Identity, levels = c("Distal Lung", "Non-Distal Lung"))
 
@@ -26,7 +26,7 @@ ggplot(pts_coo_id,
 library(skitools)
 library(wesanderson)
 
-pts_coo_id_4B <- readRDS(file.path(params$fileLoc,'../data/Fig4/4B_pts_coo_id.rds'))
+pts_coo_id_4B <- readRDS('../data/Fig4/4B_pts_coo_id.rds')
 
 res.plot =  pts_coo_id_4B[, prop.test(sum(Identity == 'Distal Lung'), .N) %>% dflm %>% cbind(nprox = sum(Identity == 'Distal Lung'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
 
