@@ -19,8 +19,8 @@ library(forcats)
 library(ggpubr)
 library(ggforce)
 
-mat.in.2 <- readRDS(file.path(params$fileLoc,'../data/Fig3/3A_mat.in.2.rds'))
-col_fun2 <- readRDS(file.path(params$fileLoc,'../data/Fig3/3A_col_fun2.rds'))
+mat.in.2 <- readRDS('../data/Fig3/3A_mat.in.2.rds')
+col_fun2 <- readRDS('../data/Fig3/3A_col_fun2.rds')
 
 column_ha3_1 = HeatmapAnnotation(
   Tobacco = anno_barplot(mat.in.2[mat.in.2$cluster_sk_non_apobec == 1,29], ylim = c(0, 200000), gp = gpar(col = "red", fill = "#FF0000") , axis = FALSE),
@@ -147,7 +147,7 @@ draw(ht_list, row_title = "Heatmap list", column_title = "Heatmap list")
 library(skitools)
 
 # Distal Lung
-fig3B_data <- readRDS(file.path(params$fileLoc,'../data/Fig3/3B_data.rds'))
+fig3B_data <- readRDS('../data/Fig3/3B_data.rds')
 ggplot(fig3B_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
@@ -209,7 +209,7 @@ ggplot(fig3B_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
 library(skitools)
 
 # tmb
-extd_data_3 <- fread(file.path(params$fileLoc,'../data/Fig3/3CDE_extd_data_3.csv'))
+extd_data_3 <- fread('../data/Fig3/3CDE_extd_data_3.csv')
 ik = 'tmb_75_pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -420,7 +420,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 #Load libraries.
 library(skitools)
 
-extd_data_3 <- fread(file.path(params$fileLoc,'../data/Fig3/3CDE_extd_data_3.csv'))
+extd_data_3 <- fread('../data/Fig3/3CDE_extd_data_3.csv')
 ik = 'Never_Smoker'
 freq.plot.tmp.f = extd_data_3[!is.na(CellOfOrigin)]
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -451,7 +451,7 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 library(skitools)
 
 # KRAS
-extd_data_3 <- fread(file.path(params$fileLoc,'../data/Fig3/3CDE_extd_data_3.csv'))
+extd_data_3 <- fread('../data/Fig3/3CDE_extd_data_3.csv')
 ik = 'KRAS'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
