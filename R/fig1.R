@@ -4,7 +4,7 @@ library(skitools)
 library(dplyr)
 
 #Load identity calls per cell and patient.
-combined_emb = read.table("../data/combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv",sep=",",header=TRUE)
+combined_emb = read.table(file.path(params$fileLoc, "Fig1/1C_combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv"),sep=",",header=TRUE)
 query_samp = combined_emb[which(combined_emb$ref_or_query=="query"),]
 cellcount_mat = query_samp[,c("X","Patient")]
 aa = as.data.frame(table(cellcount_mat$Patient))
@@ -19,7 +19,8 @@ LUAD_query = query_samp_nw[which(query_samp_nw$Patient %in% LUAD),]
 distal = c("AT0","AT1","AT2","AT2 proliferating")
 rare = c("Ionocyte","Tuft","Neuroendocrine")
 distal_rare = c(distal,rare)
-proximal = setdiff(colnames(epicells),distal_rare)
+epicells = c("AT1","AT2","AT2 proliferating","AT0","Suprabasal","Basal resting","Hillock-like","Multiciliated (non-nasal)","Multiciliated (nasal)","Deuterosomal","Neuroendocrine","Ionocyte","Tuft","Goblet (nasal)","Club (nasal)","Club (non-nasal)","pre-TB secretory","Goblet (bronchial)","Goblet (subsegmental)","SMG serous (bronchial)","SMG mucous","SMG duct","SMG serous (nasal)")
+proximal = setdiff(epicells,distal_rare)
 LUAD_query$cat = ifelse(LUAD_query$ann_finest_lev_transferred_label_filtered %in% distal,"distal",LUAD_query$ann_finest_lev_transferred_label_filtered)
 
 #Group cells in categories for plotting.
@@ -39,13 +40,11 @@ LUAD_query[LUAD_query$ann_finest_lev_transferred_label_filtered %in% secretory,"
 LUAD_query[LUAD_query$ann_finest_lev_transferred_label_filtered %in% smg,"cat1"]="smg"
 LUAD_query$cat1 = ifelse(LUAD_query$ann_finest_lev_transferred_label_filtered %in% rare,LUAD_query$cat,LUAD_query$cat1)
 
-#Consolidate results into percentages per cell group per patient. 
-dft2 <- LUAD_query %>%
-  group_by(Patient, cat1) %>%
-  summarise(count = n()) %>%             # Count the rows per group
-  mutate(total = sum(count),             # Calculate total counts per patient
-         percentage = (count / total) * 100) %>%  # Calculate percentage
-  dplyr::select(-total)
+#Consolidate results into percentages per cell group per patient.
+# Count the rows per group
+# Calculate total counts per patient
+ # Calculate percentage
+dft2 <- LUAD_query %>% group_by(Patient, cat1) %>% summarise(count = n()) %>% mutate(total = sum(count), percentage = (count / total) * 100) %>% dplyr::select(-total)
 
 #Set patient order and plot.
 dft2$Patient <- factor(dft2$Patient, levels = c('LX681','UHL-7','WCM-3','UHL-3','LX666','WCM-2','LX701','LX679','WCM-4','UHL-5','UHL-8','LX661','LX699','LX676','UHL-1','UHL-4','UHL-6','WCM-1','PS05','PS06','PS09','PS03','PS04','PS10','UHL-2','LX680'))
@@ -56,4 +55,4 @@ p = ggplot(data=dft2, aes(x=Patient, y=percentage, fill=cat1)) +
   scale_fill_manual(values=c("AT1"= '#1F77B4',"AT2"="#FF7F0E","Basal"="#279E68",
                              "multiciliated"="#D62728","Neuroendocrine"="#AA0","Tuft" = "salmon","Ionocyte"="grey",
                              "secretory"="#8C564B","smg"="#E377C2"))
-ppdf(print(p),filename="Fig1C.pdf")
+print(p)
