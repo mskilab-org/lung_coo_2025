@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------------------------------------
+# EDF 1A
+# ------------------------------------------------------------------------------------------------
+#Load the required libraries.
 library(skitools)
 library(data.table)
 library(skidb)
@@ -8,25 +12,17 @@ library(wesanderson)
 library(readxl)
 library(ggalluvial)
 library(readxl)
-library(ggsankey)
 library(effects)
 library(stats)
 library(forcats) 
 library(ggpubr)
 library(ggforce)
 library(ComplexHeatmap)
-
-# ------------------------------------------------------------------------------------------------
-# EDF 1A
-# ------------------------------------------------------------------------------------------------
-
-#Load the required libraries.
-library(skitools)
 library(Seurat)
 
 #Load the expression matrix and the cluster data.
-expDat = readRDS("../data/sup1AExp.rds")
-clustDat = readRDS("../data/sup1AClusters.rds")
+expDat = readRDS("../data/EDF/EDF1/1A_supExp.rds")
+clustDat = readRDS("../data/EDF/EDF1/1A_supClusters.rds")
 
 #Construct the seurat object.
 seu = CreateSeuratObject(counts = expDat)
@@ -35,7 +31,6 @@ seu@meta.data$seurat_clusters = clustDat
 #Generate the Dotplot.
 p = DotPlot(seu, features = rownames(expDat), group.by="seurat_clusters") + theme(axis.text.x = element_text(angle = 45, hjust = 1))
 print(p)
-
 
 # ------------------------------------------------------------------------------------------------
 # EDF 1B & 1C
@@ -47,9 +42,9 @@ library(Seurat)
 library(ggpubr)
 
 #Load seurat metadata (with clustering results and cell names), load per cell aneploidy scores, and load shannon entropy scores per cluster.
-tmp.plot = data.table(readRDS("~/projects/scLung/db/seuMetaData.rds"))
-tmp.l.norm = readRDS("~/../spanja/Projects/COO/anneuploidy zscore.rds")
-exp_shannon = readRDS("/gpfs/commons/home/jandrademartínez/projects/scLung/db/clusterEntropy.rds")
+tmp.plot = data.table(readRDS("../data/EDF/EDF1/1BC_seuMetaData.rds"))
+tmp.l.norm = readRDS("../data/EDF/EDF1/1BC_anneuploidy_zscore.rds")
+exp_shannon = readRDS("../data/EDF/EDF1/1BC_clusterEntropy.rds")
 
 #Create table of total aneuploidy score per cell. Add to the metadata table.
 aneu.score = data.table(cell = rownames(tmp.l.norm), Aneuplody.Score = apply(tmp.l.norm,1,function(x) sum(abs(x))))
@@ -80,8 +75,7 @@ tmp.df.nw[13,'cat']="Carcinoma"
 p = ggscatter(tmp.df.nw, x = "S.Diversity.num", y = "Aneuploidy.Score.mean",
               color = 'cat',
               repel = TRUE, xlab = "Shannon's Diversity", ylab = 'Aneuploidy Score (mean)')
-ppdf(print(p), cex = 0.7,filename="../data/Supp1C.pdf")
-
+print(p)
 #Link carcinoma and non-carcinoma annotations to each cell.
 tmp.plot$cat = ""
 for(i in 1:nrow(tmp.df.nw)){
@@ -105,19 +99,18 @@ print(p)
 # ------------------------------------------------------------------------------------------------
 # EDF 2
 # ------------------------------------------------------------------------------------------------
-
 #Load requires libraries.
 library(skitools)
 library(data.tree)
 
 #Load sikkema metadata table. Format data so that each row represents a full hierarchy for a given celltype.
-sikkema_meta = read.table("../data/sikk_meta_epi.csv",header=T,sep=",")
+sikkema_meta = read.table("../data/EDF/EDF2/2_sikk_meta_epi.csv",header=T,sep=",")
 sikkema_meta = sikkema_meta[,c("ann_level_1","ann_level_2","ann_level_3","ann_level_4","ann_finest_level")]
 
 #Adjust AT0 annotation to conform with Alveolar annotation.
 sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_2 = "Alveolar epithelium"
 sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_3 = "AT2"
-sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_4 = "AT2"
+sikkema_meta[sikkema_meta$ann_finest_level=="AT0",]$ann_level_4 = "AT0"
 
 #Populate AT1 and AT2 annotations for level 3 (i.e.: replace curent None value with the cell name).
 sikkema_meta[sikkema_meta$ann_finest_level=="AT2",]$ann_level_4 = "AT2"
@@ -152,23 +145,17 @@ tree_graph <- DiagrammeR::add_global_graph_attrs(
   attr_type = "node"
 )
 
-# Render the left-to-right tree plot and export to pdf.
-DiagrammeR::export_graph(
-  tree_graph,
-  file_name = "../data//hierarchical_dendrogram_v3.pdf",  # specify file name
-  file_type = "pdf"
-)
- 
+# Render the left-to-right tree plot.
+DiagrammeR::render_graph(tree_graph)
 
 # ------------------------------------------------------------------------------------------------
 # EDF 3
 # ------------------------------------------------------------------------------------------------
-
 #Load libraries.
 library(skitools)
 
 #Load file with cell metadata and identity call results.
-normal_labs = fread("../data/combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv")
+normal_labs = fread("../data/EDF/EDF3/3_combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv")
 #Filter results based on uncertainty of identity calls. If uncertainty is lower than 0.5, label as unknown.
 normal_labs$ann_finest_lev_transferred_label_filtered = ifelse(normal_labs$ann_finest_lev_transfer_uncert < 0.5,normal_labs$ann_finest_lev_transferred_label_unfiltered,"Unknown")
 #Filter for identity call results and true identity labels.
@@ -228,142 +215,15 @@ p = ggplot(acc_mat, aes(x = cat, y = V1)) +
   geom_bar(stat = "identity", fill = "steelblue") +
   theme_minimal() + coord_flip()
 print(p)
-
+                                                                             
 # ------------------------------------------------------------------------------------------------
 # EDF 4A
 # ------------------------------------------------------------------------------------------------
-
 #Load required libraries.
 library(skitools)
 
 #Load GRanges with centroid expression data.
-juan.genes.gr.nw = readRDS("../data/genes_gr_LUAD.rds")
-juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
-
-#Define quantiles for partitioning the genes by AT2 expression.
-AT0.quant <- quantile(juan.genes.gr.nw.dt$AT2)
-AT0.quant.2 <- quantile(juan.genes.gr.nw.dt$AT2, probs = c(0.33, 0.67, 1))
-
-#Define a data.frame starting from the expression information. 
-sikk_AT0 <- juan.genes.gr.nw.dt$AT2 %>% as.data.frame()
-#Add quantile information and gene name.
-colnames(sikk_AT0)[1] = 'AT2'
-sikk_AT0$gene <- juan.genes.gr.nw.dt$gene_name
-lowAT0.quant <- sikk_AT0[which(sikk_AT0$AT2 <= -6.886128), ]
-midAT0.quant <- sikk_AT0[which(sikk_AT0$AT2 > -6.886128  & sikk_AT0$AT2 <= -5.963367) , ]
-highAT0.quant <- sikk_AT0[which(sikk_AT0$AT2 > -5.963367) , ]
-lowAT0.quant$Quart = 'Q1'
-midAT0.quant$Quart = 'Q2'
-highAT0.quant$Quart = 'Q3'
-AT0.quart.mat <- rbind(lowAT0.quant,midAT0.quant,highAT0.quant)
-
-#Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
-mgenes= readRDS("../data/mgenes.rds")
-mgenes2 <- copy(mgenes)
-juan.genes.gr.nw.dt$densityLUAD <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*246)
-saveRDS(mgenes,"~/mgenes.rds")
-
-#Make sure quantile data.frame gene order matches snv counts GRanges gene order. Remove NAs. Then add gene mutational density information for LUAD to the data.frame.
-AT0LUAD_centwrtTMB = AT0.quart.mat[match(juan.genes.gr.nw.dt$gene_name,AT0.quart.mat$gene),]
-AT0LUAD_centwrtTMB = AT0LUAD_centwrtTMB[complete.cases(AT0LUAD_centwrtTMB),]  
-AT0.luadmat = cbind(AT0LUAD_centwrtTMB,juan.genes.gr.nw.dt$densityLUAD)
-colnames(AT0.luadmat)[[4]] = "densityLUAD"
-
-#Compute mean and standard deviation values for mutational density per expression quantile.
-AT0.luadmat.Q1 = AT0.luadmat[which(AT0.luadmat$Quart=="Q1"),]
-AT0.luadmat.Q1mean = mean(AT0.luadmat.Q1$densityLUAD)
-AT0.luadmat.Q1se = sd(AT0.luadmat.Q1$densityLUAD)/sqrt(length(AT0.luadmat.Q1$densityLUAD)) 
-AT0.luadmat.Q2 = AT0.luadmat[which(AT0.luadmat$Quart=="Q2"),]
-AT0.luadmat.Q2mean = mean(AT0.luadmat.Q2$densityLUAD)
-AT0.luadmat.Q2se = sd(AT0.luadmat.Q2$densityLUAD)/sqrt(length(AT0.luadmat.Q2$densityLUAD))
-AT0.luadmat.Q3 = AT0.luadmat[which(AT0.luadmat$Quart=="Q3"),]
-AT0.luadmat.Q3mean = mean(AT0.luadmat.Q3$densityLUAD)
-AT0.luadmat.Q3se = sd(AT0.luadmat.Q3$densityLUAD)/sqrt(length(AT0.luadmat.Q3$densityLUAD))
-#Save mean and sd values as a new data.frame.
-mean_AT0_mat = as.data.frame(rbind(AT0.luadmat.Q1mean,AT0.luadmat.Q2mean,AT0.luadmat.Q3mean))
-se_AT0_mat = as.data.frame(rbind(AT0.luadmat.Q1se,AT0.luadmat.Q2se,AT0.luadmat.Q3se))
-Q1.quart = "Q1"
-Q2.quart = "Q2"
-Q3.quart = "Q3"
-quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
-AT0.mean.mat = cbind(quart.mat,mean_AT0_mat,se_AT0_mat)
-rownames(AT0.mean.mat) = c(1,2,3)
-colnames(AT0.mean.mat) = c("Quart","Mean_TMB","SE")
-
-#Now repeat the complete process but using the  basal-resting centroid expression data.
-#Compute expression quantiles.
-suprabasal.quant <- quantile(juan.genes.gr.nw.dt$Basal.resting)
-suprabasal.quant.2 <- quantile(juan.genes.gr.nw.dt$Basal.resting, probs = c(0.33, 0.67, 1))
-sikk_sup <- juan.genes.gr.nw.dt$Basal.resting %>% as.data.frame()
-colnames(sikk_sup)[1] = 'goblet'
-sikk_sup$gene <- juan.genes.gr.nw.dt$gene_name
-
-#Assign quantile labels to each gene.
-lowsup.quant <- sikk_sup[which(sikk_sup$goblet <= -6.888385), ]
-midsup.quant <- sikk_sup[which(sikk_sup$goblet > -6.888385  & sikk_sup$goblet <= -6.101867) , ]
-highsup.quant <- sikk_sup[which(sikk_sup$goblet > -6.101867) , ]
-lowsup.quant$Quart = 'Q1'
-midsup.quant$Quart = 'Q2'
-highsup.quant$Quart = 'Q3'
-sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
-
-#Make a data.frame with expression quantile and mutational density. Compute mean and standard deviation of mutational density per expression quantile. 
-supLUAD_centwrtTMB = sup.quart.mat[match(juan.genes.gr.nw.dt$gene_name,sup.quart.mat$gene),]
-supLUAD_centwrtTMB = supLUAD_centwrtTMB[complete.cases(supLUAD_centwrtTMB),]
-sup.luadmat = cbind(supLUAD_centwrtTMB,juan.genes.gr.nw.dt$densityLUAD)
-colnames(sup.luadmat)[[4]] = "densityLUAD"
-sup.luadmat.Q1 = sup.luadmat[which(sup.luadmat$Quart=="Q1"),]
-sup.luadmat.Q1mean = mean(sup.luadmat.Q1$densityLUAD)
-sup.luadmat.Q1se = sd(sup.luadmat.Q1$densityLUAD)/sqrt(length(sup.luadmat.Q1$densityLUAD)) 
-sup.luadmat.Q2 = sup.luadmat[which(sup.luadmat$Quart=="Q2"),]
-sup.luadmat.Q2mean = mean(sup.luadmat.Q2$densityLUAD)
-sup.luadmat.Q2se = sd(sup.luadmat.Q2$densityLUAD)/sqrt(length(sup.luadmat.Q2$densityLUAD))
-sup.luadmat.Q3 = sup.luadmat[which(sup.luadmat$Quart=="Q3"),]
-sup.luadmat.Q3mean = mean(sup.luadmat.Q3$densityLUAD)
-sup.luadmat.Q3se = sd(sup.luadmat.Q3$densityLUAD)/sqrt(length(sup.luadmat.Q3$densityLUAD))
-mean_sup_mat = as.data.frame(rbind(sup.luadmat.Q1mean,sup.luadmat.Q2mean,sup.luadmat.Q3mean))
-se_sup_mat = as.data.frame(rbind(sup.luadmat.Q1se,sup.luadmat.Q2se,sup.luadmat.Q3se))
-Q1.quart = "Q1"
-Q2.quart = "Q2"
-Q3.quart = "Q3"
-
-#Combine data.frames with mean and standard deviation per expression quartile for AT2 and basal resting cells. 
-quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
-sup.mean.mat = cbind(quart.mat,mean_sup_mat,se_sup_mat)
-rownames(sup.mean.mat) = c(1,2,3)
-colnames(sup.mean.mat) = c("Quart","Mean_TMB","SE")
-sup.mean.mat$celltype = "basalresting"
-AT0.mean.mat$celltype="AT2"
-mean.mat.luad = rbind(AT0.mean.mat,sup.mean.mat)
-mean.mat.luad$celltype = as.factor(mean.mat.luad$celltype)
-
-#Plot the graph.
-p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color = celltype)) + 
-  geom_point(size = 4) + 
-  geom_line(size = 1.2) +
-  geom_errorbar(aes(ymin = Mean_TMB - SE, ymax = Mean_TMB + SE), width = 0.2, size = 0.9, color = 'black') +
-  theme(axis.text = element_text(size = 20)) + 
-  theme(axis.title = element_text(size = 20)) + 
-  theme(
-    panel.background = element_rect(fill = 'transparent'),
-    plot.background = element_rect(fill = 'transparent', color = NA),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    legend.background = element_rect(fill = 'transparent'),
-    legend.box.background = element_rect(fill = 'transparent')
-  )
-
-print(p)
-                                                                             
-# ------------------------------------------------------------------------------------------------
-# EDF 4B
-# ------------------------------------------------------------------------------------------------
-
-#Load required libraries.
-library(skitools)
-
-#Load GRanges with centroid expression data.
-juan.genes.gr.nw = readRDS("../data/genes_gr_LUSC.rds")
+juan.genes.gr.nw = readRDS("../data/EDF/EDF4/4B_genes_gr_LUSC.rds")
 juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
 
 #Define quantiles for partitioning the genes by basal resting expression.
@@ -384,7 +244,7 @@ highsup.quant$Quart = 'Q3'
 sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
 
 #Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
-mgenes= readRDS("../data/mgenes.rds")
+mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF4/4AB_mgenes.rds"))
 mgenes2 <- copy(mgenes)
 juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*53)
 
@@ -482,19 +342,145 @@ p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color =
   )
 
 print(p)
+                                                                             
+# ------------------------------------------------------------------------------------------------
+# EDF 4B
+# ------------------------------------------------------------------------------------------------
+#Load required libraries.
+library(skitools)
+
+#Load GRanges with centroid expression data.
+juan.genes.gr.nw = readRDS("../data/EDF/EDF4/4B_genes_gr_LUSC.rds")
+juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
+
+#Define quantiles for partitioning the genes by basal resting expression.
+sup.quant <- quantile(juan.genes.gr.nw.dt$Basal.resting)
+sup.quant.2 <- quantile(juan.genes.gr.nw.dt$Basal.resting, probs = c(0.33, 0.67, 1))
+
+#Define a data.frame starting from the expression information.
+sikk_sup <- juan.genes.gr.nw.dt$Basal.resting %>% as.data.frame()
+#Add quantile information and gene name.
+colnames(sikk_sup)[1] = 'Goblet'
+sikk_sup$gene <- juan.genes.gr.nw.dt$gene_name
+lowsup.quant <- sikk_sup[which(sikk_sup$Goblet <= -6.888385), ]
+midsup.quant <- sikk_sup[which(sikk_sup$Goblet > -6.888385  & sikk_sup$Goblet <= -6.101867) , ]
+highsup.quant <- sikk_sup[which(sikk_sup$Goblet > -6.101867) , ]
+lowsup.quant$Quart = 'Q1'
+midsup.quant$Quart = 'Q2'
+highsup.quant$Quart = 'Q3'
+sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
+
+#Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
+mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF4/4AB_mgenes.rds"))
+mgenes2 <- copy(mgenes)
+juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*53)
+
+#Make sure quantile data.frame gene order matches snv counts GRanges gene order. Remove NAs. Then add gene mutational density information for LUAD to the data.frame.
+supLUSC_centwrtTMB = sup.quart.mat[match(juan.genes.gr.nw.dt$gene_name,sup.quart.mat$gene),]
+supLUSC_centwrtTMB = supLUSC_centwrtTMB[complete.cases(supLUSC_centwrtTMB),]
+sup.luscmat = cbind(supLUSC_centwrtTMB,juan.genes.gr.nw.dt$densityLUSC)
+colnames(sup.luscmat)[[4]] = "densityLUSC"
+
+#Compute mean and standard deviation values for mutational density per expression quantile.
+sup.luscmat.Q1 = sup.luscmat[which(sup.luscmat$Quart=="Q1"),]
+sup.luscmat.Q1mean = mean(sup.luscmat.Q1$densityLUSC)
+sup.luscmat.Q1se = sd(sup.luscmat.Q1$densityLUSC)/sqrt(length(sup.luscmat.Q1$densityLUSC)) 
+sup.luscmat.Q2 = sup.luscmat[which(sup.luscmat$Quart=="Q2"),]
+sup.luscmat.Q2mean = mean(sup.luscmat.Q2$densityLUSC)
+sup.luscmat.Q2se = sd(sup.luscmat.Q2$densityLUSC)/sqrt(length(sup.luscmat.Q2$densityLUSC))
+sup.luscmat.Q3 = sup.luscmat[which(sup.luscmat$Quart=="Q3"),]
+sup.luscmat.Q3mean = mean(sup.luscmat.Q3$densityLUSC)
+sup.luscmat.Q3se = sd(sup.luscmat.Q3$densityLUSC)/sqrt(length(sup.luscmat.Q3$densityLUSC))
+#Save mean and sd values as a new data.frame.
+mean_sup_mat_lusc = as.data.frame(rbind(sup.luscmat.Q1mean,sup.luscmat.Q2mean,sup.luscmat.Q3mean))
+se_sup_mat_lusc = as.data.frame(rbind(sup.luscmat.Q1se,sup.luscmat.Q2se,sup.luscmat.Q3se))
+Q1.quart = "Q1"
+Q2.quart = "Q2"
+Q3.quart = "Q3"
+quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
+sup.mean.mat = cbind(quart.mat,mean_sup_mat_lusc,se_sup_mat_lusc)
+rownames(sup.mean.mat) = c(1,2,3)
+colnames(sup.mean.mat) = c("Quart","Mean_TMB","SE")
+
+#Do the same process for AT2 expression. Define quantiles.
+AT2.quant <- quantile(juan.genes.gr.nw.dt$AT2)
+AT2.quant.2 <- quantile(juan.genes.gr.nw.dt$AT2, probs = c(0.33, 0.67, 1))
+
+#Define a data.frame starting from the expression information.
+sikk_AT2 <- juan.genes.gr.nw.dt$AT2 %>% as.data.frame()
+#Add quantile information and gene name.
+colnames(sikk_AT2)[1] = 'AT2'
+sikk_AT2$gene <- juan.genes.gr.nw.dt$gene_name
+lowAT2.quant <- sikk_AT2[which(sikk_AT2$AT2 <= -6.886128), ]
+midAT2.quant <- sikk_AT2[which(sikk_AT2$AT2 > -6.886128  & sikk_AT2$AT2 <= -5.963367) , ]
+highAT2.quant <- sikk_AT2[which(sikk_AT2$AT2 > -5.963367) , ]
+lowAT2.quant$Quart = 'Q1'
+midAT2.quant$Quart = 'Q2'
+highAT2.quant$Quart = 'Q3'
+AT2.quart.mat <- rbind(lowAT2.quant,midAT2.quant,highAT2.quant)
+
+#Make sure quantile data.frame gene order matches snv counts GRanges gene order. Remove NAs. Then add gene mutational density information for LUAD to the data.frame.
+AT2lusc_centwrtTMB = AT2.quart.mat[match(juan.genes.gr.nw.dt$gene_name,AT2.quart.mat$gene),]
+AT2lusc_centwrtTMB = AT2lusc_centwrtTMB[complete.cases(AT2lusc_centwrtTMB),]
+AT2.luscmat = cbind(AT2lusc_centwrtTMB,juan.genes.gr.nw.dt$densityLUSC)
+colnames(AT2.luscmat)[[4]] = "densityLUSC"
+
+#Compute mean and standard deviation values for mutational density per expression quantile.
+AT2.luscmat.Q1 = AT2.luscmat[which(AT2.luscmat$Quart=="Q1"),]
+AT2.luscmat.Q1mean = mean(AT2.luscmat.Q1$densityLUSC)
+AT2.luscmat.Q1se = sd(AT2.luscmat.Q1$densityLUSC)/sqrt(length(AT2.luscmat.Q1$densityLUSC)) 
+AT2.luscmat.Q2 = AT2.luscmat[which(AT2.luscmat$Quart=="Q2"),]
+AT2.luscmat.Q2mean = mean(AT2.luscmat.Q2$densityLUSC)
+AT2.luscmat.Q2se = sd(AT2.luscmat.Q2$densityLUSC)/sqrt(length(AT2.luscmat.Q2$densityLUSC))
+AT2.luscmat.Q3 = AT2.luscmat[which(AT2.luscmat$Quart=="Q3"),]
+AT2.luscmat.Q3mean = mean(AT2.luscmat.Q3$densityLUSC)
+AT2.luscmat.Q3se = sd(AT2.luscmat.Q3$densityLUSC)/sqrt(length(AT2.luscmat.Q3$densityLUSC))
+mean_AT2_mat = as.data.frame(rbind(AT2.luscmat.Q1mean,AT2.luscmat.Q2mean,AT2.luscmat.Q3mean))
+#Save mean and sd values as a new data.frame.
+se_AT2_mat = as.data.frame(rbind(AT2.luscmat.Q1se,AT2.luscmat.Q2se,AT2.luscmat.Q3se))
+Q1.quart = "Q1"
+Q2.quart = "Q2"
+Q3.quart = "Q3"
+
+#Combine data.frames with mean and standard deviation per expression quartile for AT2 and basal resting cells.
+quart.mat = as.data.frame(rbind(Q1.quart,Q2.quart,Q3.quart))
+AT2.mean.mat = cbind(quart.mat,mean_AT2_mat,se_AT2_mat)
+rownames(AT2.mean.mat) = c(1,2,3)
+colnames(AT2.mean.mat) = c("Quart","Mean_TMB","SE")
+AT2.mean.mat$celltype = "AT2"
+sup.mean.mat$celltype="Basalresting"
+
+#Plot the graph.
+mean.mat.lusc = rbind(AT2.mean.mat,sup.mean.mat)
+mean.mat.lusc$celltype = as.factor(mean.mat.lusc$celltype)
+p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color = celltype)) + 
+  geom_point(size = 4) + 
+  geom_line(size = 1.2) + 
+  geom_errorbar(aes(ymin = Mean_TMB - SE, ymax = Mean_TMB + SE), width = 0.2, size = 0.9, color = 'black') +
+  theme(axis.text = element_text(size = 20)) + 
+  theme(axis.title = element_text(size = 20)) + 
+  theme(
+    panel.background = element_rect(fill = 'transparent'),
+    plot.background = element_rect(fill = 'transparent', color = NA),
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    legend.background = element_rect(fill = 'transparent'),
+    legend.box.background = element_rect(fill = 'transparent')
+  )
+
+print(p)
 
 # ------------------------------------------------------------------------------------------------
 # EDF 5A
 # ------------------------------------------------------------------------------------------------
-
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExpr.rds")
-dt2 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
-dt3 = readRDS("../data/DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt1 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
+dt2 = readRDS("../data/EDF/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/EDF/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with tobacco counts per patient. Save with pair ID as data.table.
@@ -504,7 +490,7 @@ count.int$pair = gsub("snv.tob.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS("../data/new.pairs.luad.rds")
+luad_pairs = readRDS(file.path(params$fileLoc,"new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -520,7 +506,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS("../data/epcells.rds")
+sikk.cent = readRDS(file.path(params$fileLoc,"epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -587,8 +573,6 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
   )+ labs(x = "Expression", y = "Mean TMB for tobacco")+ theme(legend.position = "none")
 
 print(p)
-
-
 # ------------------------------------------------------------------------------------------------
 # EDF 5B
 # ------------------------------------------------------------------------------------------------
