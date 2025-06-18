@@ -1127,8 +1127,8 @@ ggplot(pts_coo_id,
 ## Figure 4B
 ```{r, fig4B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
-#library(skitools)
-#library(wesanderson)
+library(skitools)
+library(wesanderson)
 
 pts_coo_id_4B <- readRDS(file.path(params$fileLoc,'Fig4/4B_pts_coo_id.rds'))
 
@@ -1915,7 +1915,7 @@ count.int$pair = gsub("snv.tob.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS(file.path(params$fileLoc,"new.pairs.luad.rds"))
+luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -1931,7 +1931,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS(file.path(params$fileLoc,"epcells.rds"))
+sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -2019,7 +2019,7 @@ count.int$pair = gsub("snv.aging.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS(file.path(params$fileLoc,"new.pairs.luad.rds"))
+luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -2035,7 +2035,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS(file.path(params$fileLoc,"epcells.rds"))
+sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -2123,7 +2123,7 @@ count.int$pair = gsub("snv.apobec.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS(file.path(params$fileLoc,"new.pairs.luad.rds"))
+luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -2139,7 +2139,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS(file.path(params$fileLoc,"epcells.rds"))
+sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -2214,6 +2214,9 @@ print(p)
 ```
 
 ```{r, extfig6, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+#Load libraries.
+library(skitools)
+
 # Accuracy for predicting true cell type at different levels 
 
 sims_acc_results <- fread(file.path(params$fileLoc,'EDF/EDF6/6_luad_sims_results.csv'))
