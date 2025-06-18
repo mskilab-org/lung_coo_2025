@@ -1,8 +1,8 @@
-## FIGURE 2B ##
+## Figure 2B ##
 library(skitools)
 library(MASS)
 library(parallel)
-res = readRDS("../data/Fig2B.rds")
+res = readRDS(file.path(params$fileLoc, "../data/Fig2/2B_data.rds"))
 
 #Set estimates value for each celltype below fdr threshold (0.1) to null value of 1. This effectively discards said celltypes from COO calling. 
 dt = dcast.data.table(res[grep('cov', name), ][, estimate2 := ifelse(fdr<0.1, estimate, 1)], tt ~ celltype, value.var = 'estimate2')
@@ -33,14 +33,13 @@ dt.plot$ci.upper = dt.plot$ci.upper - 1
 in.pattern.tt = c('LUAD')
 in.pattern.snv = "snv.count"
 in.ct.sub = epicells
-ppdf(
-  for (ik in in.pattern.tt)
+for (ik in in.pattern.tt)
   {
     message('\nPlotting mutational density for: ', ik, ' samples')
 #Filter for any cancer type, celltype, or snv column if needed. 
     in.pattern = in.pattern.snv
     in.count.sub = grep(paste0(in.pattern),dt.plot$tt, value = TRUE)
-    dt.plot.sub = dt.plot[tumor.type %in% ik & celltype %in% in.ct.sub & tt %in% in.count.sub,]
+    dt.plot.sub = dt.plot[dt.plot$tumor.type %in% ik & dt.plot$celltype %in% in.ct.sub & dt.plot$tt %in% in.count.sub,]
 #Order results by relative risk (lower to higher).     
     setorder(dt.plot.sub,celltype)
     in.title = unique(gsub(" - .*","",dt.plot.sub$combination.formal))
@@ -62,13 +61,13 @@ ppdf(
       theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) +
       coord_flip()
     print(p)
-  }, file= "Fig2B_LUAD.pdf",cex = c(0.95,1.25))
+  }
 
-## FIGURE 2C ##
+## Figure 2C ##
 library(skitools)
 library(MASS)
 library(parallel)
-res = readRDS("../data/Fig2C.rds")
+res = readRDS(file.path(params$fileLoc, "../data/Fig2/2C_data.rds"))
 
 #Now set estimates value for each celltype below fdr threshold (0.1) to null value of 1. This effectively discards said celltypes from COO calling. 
 dt = dcast.data.table(res[grep('cov', name), ][, estimate2 := ifelse(fdr<0.1, estimate, 1)], tt ~ celltype, value.var = 'estimate2')
@@ -97,18 +96,16 @@ dt.plot$ci.upper = dt.plot$ci.upper - 1
 # Relative risk barplots. The code allows for filtering for specific cancer type, snv columns, and celltypes via in.pattern.tt, in.pattern.snv, and in.ct.sub respectively. Here we add the values needed for plotting all GLM outputs defined above with no restriction. Note that multiple cancer subtype grpahs can be done by adding more values to in.pattern.tt. 
 in.pattern.tt = c('LUSC')
 in.pattern.snv = "snv.count"
-ppdf(
-  for (ik in in.pattern.tt)
+for (ik in in.pattern.tt)
   {
     message('\nPlotting mutational density for: ', ik, ' samples')
 #Filter for any cancer type, celltype, or snv column if needed.     
     in.ct.sub = epicells
     in.pattern = in.pattern.snv
     in.count.sub = grep(paste0(in.pattern),dt.plot$tt, value = TRUE)
-    dt.plot.sub = dt.plot[tumor.type %in% ik & celltype %in% in.ct.sub & tt %in% in.count.sub,]
+    dt.plot.sub = dt.plot[dt.plot$tumor.type %in% ik & dt.plot$celltype %in% in.ct.sub & dt.plot$tt %in% in.count.sub,]
 #Order results by relative risk (lower to higher).         
     setorder(dt.plot.sub,celltype)
-    print(dt.plot.sub)
     in.title = unique(gsub(" - .*","",dt.plot.sub$combination.formal))
 # Set upper and lower limits for plot (x axis).
     in.axis.breaks = 0.05
@@ -129,5 +126,4 @@ ppdf(
       theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) +
       coord_flip()
     print(p)
-  }, file= "Fig2C_LUSC.pdf",cex = c(0.95,1.25))
-    
+    }
