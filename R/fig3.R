@@ -217,7 +217,7 @@ ggplot(fig3B_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
 # ------------------------------------------------------------------------------------------------
 
 # tmb
-extd_data_3 <- fread(file.path(params$fileLoc,'extd_data_3.csv'))
+extd_data_3 <- fread('../data/extd_data_3.csv'))
 ik = 'tmb_75_pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
