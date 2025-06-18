@@ -910,7 +910,7 @@ average_df = as.data.frame(average_df)
 #Line graph is plotted. Depending on whether both uni and multivariate are plotted use the first line or the second (comment/uncomment adequately).
 p =  ggplot(data=average_df, aes(x=log10(TMB), y=average_value)) + geom_line(color="blue")+ geom_point() + ggtitle("Accuracy per TMB Multivariate - Proximal vs Distal" ) + xlab("Log10(TMB) (mut/mb)") + ylab("Accuracy") + scale_y_continuous(limits=c(0,1)) +   theme(text = element_text(size = 20)) 
 #p =  ggplot(data=average_df, aes(x=log10(TMB), y=average_value, color = Method, group=Method)) + geom_line(color="red")+ geom_point(aes(shape=Method),size=2) + ggtitle("Accuracy per TMB - Celltype" ) + xlab("Log10(TMB) (mut/mb)") + ylab("Accuracy") + scale_y_continuous(limits=c(0,1)) +   theme(text = element_text(size = 20)) +  scale_color_manual(values = c("Univariate" = "red", "Multivariate" = "blue")) 
-ppdf(print(p),file="edf7.pdf")
+print(p)
 
 
 
@@ -1260,7 +1260,7 @@ p <- ggplot(tmp.plot, aes(x, y, colour = color), size = 3) +
   theme_bw() + 
   theme(legend.position = "top") +
   scale_colour_identity()
-ppdf(print(p),filename="UMAP with WCM-1 patient knn6_nw1.pdf")
+print(p)
 
 # ------------------------------------------------------------------------------------------------
 # EDF 10 B
@@ -1280,4 +1280,4 @@ p <- ggplot(tmp.plot, aes(x = x, y = y, colour = factor(cluster)), size = 3) +
                      labels = c(names(my_colors), "Other Patients")) +
   theme_bw() + 
   theme(legend.position = "top") 
-ppdf(print(p),filename="UMAP with WCM-1 with clusters in knn6.pdf")
+print(p)
