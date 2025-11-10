@@ -15,7 +15,7 @@ p = ggplot(umap_coord, aes(UMAP1, UMAP2, color = subtype)) +
   theme_minimal()
 print(p)
 
-## Figure 1C ##
+## Figure 1C & 6A ##
 #Load libraries.
 library(skitools)
 library(dplyr)
@@ -63,7 +63,7 @@ LUAD_query$cat1 = ifelse(LUAD_query$ann_finest_lev_transferred_label_filtered %i
  # Calculate percentage
 dft2 <- LUAD_query %>% group_by(Patient, cat1) %>% summarise(count = n()) %>% mutate(total = sum(count), percentage = (count / total) * 100) %>% dplyr::select(-total)
 
-#Set patient order and plot.
+#Set patient order and plot. Figure 6A is derived from taking the WCM-1 barplot from this graph. 
 dft2$Patient <- factor(dft2$Patient, levels = c('LX681','UHL-7','WCM-3','UHL-3','LX666','WCM-2','LX701','LX679','WCM-4','UHL-5','UHL-8','LX661','LX699','LX676','UHL-1','UHL-4','UHL-6','WCM-1','PS05','PS06','PS09','PS03','PS04','PS10','UHL-2','LX680'))
 
 p = ggplot(data=dft2, aes(x=Patient, y=percentage, fill=cat1)) + 
