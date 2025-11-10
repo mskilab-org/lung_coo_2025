@@ -1,48 +1,372 @@
+
 ## Figure 4A ##
-
-#Load libraries.
 library(skitools)
-library(ggalluvial)
-library(wesanderson)
 
-pts_coo_id <- readRDS('../data/Fig4/4A_pts_coo_id.rds')
-pts_coo_id$Origin = factor(pts_coo_id$Origin, levels = c(  "Distal Lung_TP53 MUT", "Ambiguous_TP53 MUT", "Proximal Lung_TP53 MUT",  "Distal Lung_WT", "Ambiguous_WT", "Proximal Lung_WT"))
-pts_coo_id$Identity = factor(pts_coo_id$Identity, levels = c("Distal Lung", "Non-Distal Lung"))
+extd_data_3 <- fread('../data/Fig4/4ABC_extd_data_3.csv')
+ik = 'Never_Smoker'
+freq.plot.tmp.f = extd_data_3[!is.na(CellOfOrigin)]
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
 
-ggplot(pts_coo_id,
-       aes(y = Patient_Frequency,
-           axis1 = Origin,
-           axis2 = Identity)) +
-  theme_bw() +
-  geom_alluvium(aes(fill = Origin), width = 1/12) +
-  geom_stratum(width = 1/12, discern = TRUE, fill = "grey90", color = "black") +
-  geom_label(stat = "stratum", size = 3.5, aes(label = after_stat(stratum))) +
-  scale_x_discrete(limits = c("Origin", "Identity"), expand = c(0.05, 0.05)) +
-  scale_fill_manual(values = c(wes_palettes$GrandBudapest2[4], wes_palettes$Chevalier1[1], wes_palettes$GrandBudapest2[3], wes_palettes$Chevalier1[2], wes_palettes$GrandBudapest2[2], wes_palettes$Chevalier1[3], wes_palettes$AsteroidCity3[1], wes_palettes$AsteroidCity1[1])) +
-  ggtitle("Fig 4A - Origin --> Identity") + coord_flip()
-
-# Figure 4B ##
-#Load libraries.
-library(skitools)
-library(wesanderson)
-
-pts_coo_id_4B <- readRDS('../data/Fig4/4B_pts_coo_id.rds')
-
-res.plot =  pts_coo_id_4B[, prop.test(sum(Identity == 'Distal Lung'), .N) %>% dflm %>% cbind(nprox = sum(Identity == 'Distal Lung'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
-
-res.plot$Origin = factor(res.plot$Origin, levels = c('Non-Distal Lung','Distal Lung'))
-res.plot$TP53_mut = factor(res.plot$TP53_mut, levels = c('TP53 MUT','WT'))
-ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   geom_bar(stat = 'identity', position = position_dodge()) +
   geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
-  facet_grid(~Origin) +
-  scale_fill_manual(values = c(wes_palettes$Royal1[2], wes_palettes$Royal1[1])) +
-  labs(title = '', x = '', y = '') + theme_classic() +
-  theme(plot.title = element_text(size = 0, face = 'bold'),
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
         axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
         axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
         axis.title.x = element_text(size = 0, face = 'plain'),
         axis.title.y = element_text(size = 5, face = 'bold'),
         axis.ticks.x = element_blank()) + 
-  geom_text(mapping = aes(x = TP53_mut, y = ci.upper + 0.05, label = paste0(nprox, '/', tot)), size = 7) +
-  guides(fill = guide_legend(title = 'Fig 4B - Distal fraction')) + theme(legend.position = "bottom")
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+
+## Figure 4B ##
+#Load libraries.
+library(skitools)
+
+# tmb
+extd_data_3 <- fread('../data/Fig4/4ABC_extd_data_3.csv')
+ik = 'tmb_75_pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# Tobacco  
+ik = 'Tobacco_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+prox.mut = res.plot[clust.int == 'Proximal',]$nmut
+prox.wt = res.plot[clust.int == 'Proximal',]$tot - res.plot[clust.int == 'Proximal',]$nmut
+dist.mut = res.plot[clust.int == 'Distal',]$nmut
+dist.wt = res.plot[clust.int == 'Distal',]$tot - res.plot[clust.int == 'Distal',]$nmut
+prox.dist.fisher = matrix(c(prox.mut, dist.mut, prox.wt, dist.wt), nrow = 2, byrow = TRUE) %>% fisher.test %>% dflm
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  # labs(title = paste0(ik, ' - p = ', round(prox.dist.fisher$p,6), ', e = ', round(prox.dist.fisher$estimate,3)), x = '', y = '') + theme_classic() +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# ID3
+ik = 'ID3_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# Apobec
+ik = 'Apobec_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# SBS1
+ik = 'SBS1_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# SBS5
+ik = 'SBS5_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# ID1
+ik = 'ID1_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# ID12
+ik = 'ID12_75pct'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+
+## Figure 4C ##
+#Load libraries.
+library(skitools)
+
+# KRAS
+extd_data_3 <- fread('../data/Fig4/4ABC_extd_data_3.csv')
+ik = 'KRAS'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# TP53
+ik = 'TP53'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# STK11
+ik = 'STK11'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# EGFR
+ik = 'EGFR'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+# SMARCA4
+ik = 'SMARCA4'
+freq.plot.tmp.f = extd_data_3 
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
