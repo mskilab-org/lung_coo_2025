@@ -6,7 +6,7 @@ This github serves as a repository for the data and code associated to the manus
 
 The repository is composed of 2 folders: `data` and `R`, which contain the files and code required to reproduce the figures within the manuscript. Note that certain figures were further modified via Illustrator to improve legibility and/or presentation, so in some instance the specific styling (e.g.: colors) don't correspond completely between the manuscript figures and the ones shown here.
 
-**If you're interested specifically in checking the R notebook with the code and figures, you can find the latest version** [here](https://raw.githack.com/mskilab-org/lung_coo_2025/4c2ba1865e84978f7b04a244315b1d9e37ea4076/data/scLung_Figures.html) **.**
+**If you're interested specifically in checking the R notebook with the code and figures, you can find the latest version** [here](https://rawcdn.githack.com/mskilab-org/lung_coo_2025/57beddf71cfa293d7962e2a454fb21669292aad5/data/scLung_Figures.html) **.**
 
 # Repository Structure
 
