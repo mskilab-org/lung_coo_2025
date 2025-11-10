@@ -76,8 +76,8 @@ tmp_norm_wcm = rbind(tmp_norm_wcm1a,tmp_norm_wcm1b)
 tmp_norm_wcm = as.matrix(tmp_norm_wcm)
 
 #Generate heatmap annotation and then plot heatmap.
-row.ha = HeatmapAnnotation(Patient = wcm_clusters$type, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Patient = c("WCM-1-A"= "#00BA38", "WCM-1-B" = "#619CFF")), annotation_legend_param = list("WCM-1-A", "WCM-1-B"), which = "row")
-p = Heatmap(tmp_norm_wcm, name = 'z-score', cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold"))
+row.ha = HeatmapAnnotation(Patient = sort(wcm_clusters$type), name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Patient = c("WCM-1-A"= "#00BA38", "WCM-1-B" = "#619CFF")), annotation_legend_param = list("WCM-1-A", "WCM-1-B"), which = "row")
+p = Heatmap(tmp_norm_wcm, name = 'z-score', cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold"))  + row.ha
 print(p)
 
 ## Figure 6D ##
