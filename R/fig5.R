@@ -45,4 +45,4 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
         axis.title.y = element_text(size = 5, face = 'bold'),
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = TP53_mut, y = ci.upper + 0.05, label = paste0(nprox, '/', tot)), size = 7) +
-  guides(fill = guide_legend(title = 'Fig 4B - Distal fraction')) + theme(legend.position = "bottom")
+  guides(fill = guide_legend(title = 'Fig 5B - Distal fraction')) + theme(legend.position = "bottom")
