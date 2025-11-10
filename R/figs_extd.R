@@ -1288,10 +1288,10 @@ tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF6/6BC_data.rds"))
 #Define color column and color map.
 my_colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(tmp.plot$cluster)))
 tmp.plot$color = "Other cases"
-tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==2] = "WCM-1A"
-tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==3] = "WCM-1B"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==2] = "WCM-1-A"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==3] = "WCM-1-B"
 tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==1] = "WCM-1 others"
-colMap = c("WCM-1A"="mediumseagreen","WCM-1B"="darkred","WCM-1 others"="turquoise4","Other cases"="grey")
+colMap = c("WCM-1-A"="mediumseagreen","WCM-1-B"="darkred","WCM-1 others"="turquoise4","Other cases"="grey")
 
 #Plot.
 p <- ggplot(tmp.plot, aes(x = x, y = y, color = color), size = 3) + 
