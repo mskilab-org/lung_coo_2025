@@ -241,7 +241,7 @@ sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
 #Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
 mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF3/3B_mgenes.rds"))
 mgenes2 <- copy(mgenes)
-juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*242)
+juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*246)
 
 #Make sure quantile data.frame gene order matches snv counts GRanges gene order. Remove NAs. Then add gene mutational density information for LUAD to the data.frame.
 supLUSC_centwrtTMB = sup.quart.mat[match(juan.genes.gr.nw.dt$gene_name,sup.quart.mat$gene),]
