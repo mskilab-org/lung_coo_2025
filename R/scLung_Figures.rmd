@@ -1,4 +1,5 @@
 ---
+title: "`r params$set_title`"
 output:
   html_document:
     df_print: paged
@@ -85,7 +86,7 @@ function expandAll() {
 </script>
 
 <script>
-v// Get the button, and when the user clicks on it, execute myFunction
+// Get the button, and when the user clicks on it, execute myFunction
 document.getElementById("2Button").onclick = function() {collapseAll()};
 
 function collapseAll() {
@@ -224,9 +225,9 @@ th, td { padding: 5px; }
 thead, tfoot, tr:nth-child(even) { background: #eee; }
 </style>
 
----
-title: Figure Notebook
----
+```{r, include=FALSE}
+cat(sprintf('<script>document.title = "%s";</script>', params$set_title))
+```
 
 ```{r, setup, include = FALSE, echo = FALSE, message = TRUE}
 ## global code chunk option
@@ -296,7 +297,26 @@ knitr::knit_hooks$set(dropBelow=function(before, options, envir) {
 ```{r, fig1-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
 
-## Figure 1C
+## Figure 1B
+```{r, fig1B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+#Load libraries.
+library(skitools)
+
+#Load umap coordinates and cell identity information.
+umap_coord = read.table(file.path(params$fileLoc, "Fig1/1B_umap_coordinates.csv"),sep=",",header=TRUE)
+
+#Assign alpha and color values and plot.
+umap_coord$alpha = ifelse((umap_coord$subtype == "LUAD" | umap_coord$subtype == "LUSC" | umap_coord$subtype == "LCNEC"), 0.3, 1)
+colMap = c('AT1'='#C49A02', 'AT2'='#F1C40F', 'Basal'='#2CA02C', 'Multiciliated lineage'='#3C3C1D', 'Secretory'='#1F6B2A', 'Submucosal Secretory'='#7DDC75', 'Neuroendocrine'= '#8E44AD', 'Rare'='#CE5DAE', 'LUAD'='#E75480', 'LUSC'='#6A83FF', 'LCNEC'='#301934')
+
+p = ggplot(umap_coord, aes(UMAP1, UMAP2, color = subtype)) +
+  geom_point(aes(alpha = alpha), size = 1) +
+  scale_color_manual(values = colMap) +
+  theme_minimal()
+print(p)
+```
+
+## Figure 1C & 6A
 ```{r, fig1C, dropBelow=TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
@@ -339,13 +359,10 @@ LUAD_query[LUAD_query$ann_finest_lev_transferred_label_filtered %in% secretory,"
 LUAD_query[LUAD_query$ann_finest_lev_transferred_label_filtered %in% smg,"cat1"]="smg"
 LUAD_query$cat1 = ifelse(LUAD_query$ann_finest_lev_transferred_label_filtered %in% rare,LUAD_query$cat,LUAD_query$cat1)
 
-#Consolidate results into percentages per cell group per patient.
-# Count the rows per group
-# Calculate total counts per patient
- # Calculate percentage
+#Consolidate results into percentages per cell group per patient. Count the rows per group, calculate total counts per patient, and calculate percentage.
 dft2 <- LUAD_query %>% group_by(Patient, cat1) %>% summarise(count = n()) %>% mutate(total = sum(count), percentage = (count / total) * 100) %>% dplyr::select(-total)
 
-#Set patient order and plot.
+#Set patient order and plot. Figure 6A is derived from taking the WCM-1 barplot from this graph. 
 dft2$Patient <- factor(dft2$Patient, levels = c('LX681','UHL-7','WCM-3','UHL-3','LX666','WCM-2','LX701','LX679','WCM-4','UHL-5','UHL-8','LX661','LX699','LX676','UHL-1','UHL-4','UHL-6','WCM-1','PS05','PS06','PS09','PS03','PS04','PS10','UHL-2','LX680'))
 
 p = ggplot(data=dft2, aes(x=Patient, y=percentage, fill=cat1)) + 
@@ -356,7 +373,6 @@ p = ggplot(data=dft2, aes(x=Patient, y=percentage, fill=cat1)) +
                              "secretory"="#8C564B","smg"="#E377C2"))
 print(p)
 ```
-
 ***
 
 # Figure 2
@@ -519,16 +535,17 @@ library(readxl)
 library(ggalluvial)
 library(wesanderson)
 library(readxl)
-#library(ggsankey)
 library(effects)
 library(stats)
 library(forcats) 
 library(ggpubr)
 library(ggforce)
 
+#Load the anneuploidy and sample metadata.
 mat.in.2 <- readRDS(file.path(params$fileLoc,'Fig3/3A_mat.in.2.rds'))
 col_fun2 <- readRDS(file.path(params$fileLoc,'Fig3/3A_col_fun2.rds'))
 
+#Assign heatmap annotations based on sample metadata.
 column_ha3_1 = HeatmapAnnotation(
   Tobacco = anno_barplot(mat.in.2[mat.in.2$cluster_sk_non_apobec == 1,29], ylim = c(0, 200000), gp = gpar(col = "red", fill = "#FF0000") , axis = FALSE),
   ID3 = anno_barplot(mat.in.2[mat.in.2$cluster_sk_non_apobec == 1,32], ylim = c(0, 10000), gp = gpar(col = "#9900CC", fill = "#9900CC") , axis = FALSE) ,
@@ -624,7 +641,7 @@ column_ha3_4 = HeatmapAnnotation(
   show_annotation_name = TRUE
 )
 
-
+#Generate one heatmap per cluster, add the annotations defined above.
 set.seed(90210)
 ht1 <- Heatmap(t(mat.in.2[mat.in.2$cluster_sk_non_apobec == 1,2:24]), name = "HT1 Relative Risk", col = col_fun2, cluster_rows = TRUE, cluster_columns = TRUE, row_names_gp = gpar(fontsize = 15), column_names_gp = gpar(fontsize = 10), 
                column_names_side = c("bottom"), show_column_names = FALSE, column_km = 1, column_km_repeats = 100, top_annotation = column_ha3_1,
@@ -645,16 +662,17 @@ ht4 <- Heatmap(t(mat.in.2[mat.in.2$cluster_sk_non_apobec == 4,2:24]), name = "HT
                column_names_side = c("bottom"), show_column_names = FALSE, column_km = 1, column_km_repeats = 100, top_annotation = column_ha3_4,
                show_parent_dend_line = FALSE, column_gap = unit(c(4), "mm"), column_title = NULL, border = TRUE)
 
-
+#Combine all 4 heatmaps and plot.
 ht_list =  ht2+ ht1 + ht3 + ht4 
 draw(ht_list, row_title = "Heatmap list", column_title = "Heatmap list")
 ```
 
 ## Figure 3B 
-```{r, fig3B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+```{r, fig3B, dropBelow=TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
+#For each barplot load the COO prediction output data and plot.
 # Distal Lung
 fig3B_data <- readRDS(file.path(params$fileLoc,'Fig3/3B_data.rds'))
 ggplot(fig3B_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
@@ -713,14 +731,51 @@ ggplot(fig3B_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
   theme(axis.text.y = element_text(size = 10, angle = 0, vjust = 0.5, hjust = 1)) + guides(fill=guide_legend(title="Cell types")) +
   coord_flip()
 ```
+***
 
-## Figure 3C 
-```{r, fig3C, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+# Figure 4
+```{r, fig4-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
+```
+
+## Figure 4A 
+```{r, fig4A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+#Load libraries.
+library(skitools)
+
+extd_data_3 <- fread(file.path(params$fileLoc,'Fig4/4ABC_extd_data_3.csv'))
+ik = 'Never_Smoker'
+freq.plot.tmp.f = extd_data_3[!is.na(CellOfOrigin)]
+freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
+freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
+col.num = which(colnames(freq.plot.tmp.f) == ik)
+freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
+freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
+freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
+res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
+res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
+
+ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
+  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
+  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
+  theme(plot.title = element_text(size = 20, face = 'bold'),
+        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
+        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
+        axis.title.x = element_text(size = 0, face = 'plain'),
+        axis.title.y = element_text(size = 5, face = 'bold'),
+        axis.ticks.x = element_blank()) + 
+  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
+  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
+```
+
+## Figure 4B 
+```{r, fig4B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 # tmb
-extd_data_3 <- fread(file.path(params$fileLoc,'Fig3/3CDE_extd_data_3.csv'))
+extd_data_3 <- fread(file.path(params$fileLoc,'Fig4/4ABC_extd_data_3.csv'))
 ik = 'tmb_75_pct'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -929,45 +984,13 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 
 ```
 
-## Figure 3D 
-```{r, fig3D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
-#Load libraries.
-library(skitools)
-
-extd_data_3 <- fread(file.path(params$fileLoc,'Fig3/3CDE_extd_data_3.csv'))
-ik = 'Never_Smoker'
-freq.plot.tmp.f = extd_data_3[!is.na(CellOfOrigin)]
-freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
-freq.plot.tmp.f = freq.plot.tmp.f[!duplicated(freq.plot.tmp.f),]
-col.num = which(colnames(freq.plot.tmp.f) == ik)
-freq.plot.tmp.f$mut.int = freq.plot.tmp.f[,..col.num]
-freq.plot.tmp.f = freq.plot.tmp.f[!is.na(mut.int),]
-freq.plot.tmp.f$mut.int = as.numeric(freq.plot.tmp.f$mut.int)
-res.plot = freq.plot.tmp.f[, prop.test(sum(mut.int), .N) %>% dflm %>% cbind(nmut = sum(mut.int), tot = .N), by = .(clust.int)][, fracmut := estimate]
-res.plot$clust.int = factor(res.plot$clust.int, levels = c('Proximal','Distal', 'Ambiguous'))
-
-ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
-  geom_bar(stat = 'identity', position = position_dodge()) +
-  geom_errorbar(aes(ymin = ci.lower, ymax = ci.upper), width = 0.15) + theme_bw() + 
-  scale_fill_manual(values = c(  'olivedrab3', 'darkgoldenrod3', 'darkgrey')) +
-  labs(title = paste0(ik), x = '', y = '') + theme_classic() +
-  theme(plot.title = element_text(size = 20, face = 'bold'),
-        axis.text.x = element_text(size = 0, angle = 0, hjust = 0.5),
-        axis.text.y = element_text(size = 22, angle = 0, hjust = 1),
-        axis.title.x = element_text(size = 0, face = 'plain'),
-        axis.title.y = element_text(size = 5, face = 'bold'),
-        axis.ticks.x = element_blank()) + 
-  geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
-  guides(fill = guide_legend(title = '')) + theme(legend.position = "top")
-```
-
-## Figure 3E 
-```{r, fig3E, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 4C
+```{r, fig4C, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 # KRAS
-extd_data_3 <- fread(file.path(params$fileLoc,'Fig3/3CDE_extd_data_3.csv'))
+extd_data_3 <- fread(file.path(params$fileLoc,'Fig4/4ABC_extd_data_3.csv'))
 ik = 'KRAS'
 freq.plot.tmp.f = extd_data_3 
 freq.plot.tmp.f$clust.int = freq.plot.tmp.f$CellOfOrigin
@@ -1095,19 +1118,19 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
 ```
 ***
 
-# Figure 4
+# Figure 5
 
-```{r, fig4-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
+```{r, fig5-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
 
-## Figure 4A
-```{r, fig4A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 5A
+```{r, fig5A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 library(ggalluvial)
 library(wesanderson)
 
-pts_coo_id <- readRDS(file.path(params$fileLoc,'Fig4/4A_pts_coo_id.rds'))
+pts_coo_id <- readRDS(file.path(params$fileLoc,'Fig5/5A_pts_coo_id.rds'))
 pts_coo_id$Origin = factor(pts_coo_id$Origin, levels = c(  "Distal Lung_TP53 MUT", "Ambiguous_TP53 MUT", "Proximal Lung_TP53 MUT",  "Distal Lung_WT", "Ambiguous_WT", "Proximal Lung_WT"))
 pts_coo_id$Identity = factor(pts_coo_id$Identity, levels = c("Distal Lung", "Non-Distal Lung"))
 
@@ -1121,16 +1144,16 @@ ggplot(pts_coo_id,
   geom_label(stat = "stratum", size = 3.5, aes(label = after_stat(stratum))) +
   scale_x_discrete(limits = c("Origin", "Identity"), expand = c(0.05, 0.05)) +
   scale_fill_manual(values = c(wes_palettes$GrandBudapest2[4], wes_palettes$Chevalier1[1], wes_palettes$GrandBudapest2[3], wes_palettes$Chevalier1[2], wes_palettes$GrandBudapest2[2], wes_palettes$Chevalier1[3], wes_palettes$AsteroidCity3[1], wes_palettes$AsteroidCity1[1])) +
-  ggtitle("Fig 4A - Origin --> Identity") + coord_flip()
+  ggtitle("Fig 5A - Origin --> Identity") + coord_flip()
 ```
 
-## Figure 4B
-```{r, fig4B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 5B
+```{r, fig5B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 library(wesanderson)
 
-pts_coo_id_4B <- readRDS(file.path(params$fileLoc,'Fig4/4B_pts_coo_id.rds'))
+pts_coo_id_4B <- readRDS(file.path(params$fileLoc,'Fig5/5B_pts_coo_id.rds'))
 
 res.plot =  pts_coo_id_4B[, prop.test(sum(Identity == 'Distal Lung'), .N) %>% dflm %>% cbind(nprox = sum(Identity == 'Distal Lung'), tot = .N), by = .(TP53_mut = ifelse(TP53_mut, 'TP53 MUT', 'WT'), Origin)][, fracprox := estimate]
 
@@ -1153,75 +1176,18 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
 ```
 ***
 
-# Figure 5
+# Figure 6
 
-```{r, fig5-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
+```{r, fig6-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
 
-## Figure 5B - Left Panel
-```{r, fig5BL, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
-#Load libraries
-library(skitools)
-library(parallel)
-library(MASS)
-
-#Load csv with relative risk information per centroid for every sample.
-rel_risk = read.table(file.path(params$fileLoc,"Fig5/5B_luad_rel_risk.csv"),sep=",",header=T,row.names=1)
-
-#Group samples based on Distal, Proximal, or Ambiguous COO calls. Compute mean relative risk for each.
-#Distal
-distal = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Distal Lung"),]
-distal_ep = distal[,1:23]
-distal_ep = t(distal_ep)
-distal_ep_mean = as.matrix(rowMeans(distal_ep))
-distal_ep_mean = as.data.frame(distal_ep_mean)
-distal_ep_mean$celltype = rownames(distal_ep_mean)
-#Proximal
-proximal = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Proximal Lung"),]
-proximal_ep = proximal[,1:23]
-proximal_ep = t(proximal_ep)
-proximal_ep_mean = as.matrix(rowMeans(proximal_ep))
-proximal_ep_mean = as.data.frame(proximal_ep_mean)
-proximal_ep_mean$celltype = rownames(proximal_ep_mean)
-#Ambiguous
-ambi = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Ambiguous"),]
-ambi_ep = ambi[,1:23]
-ambi_ep = t(ambi_ep)
-ambi_ep_mean = as.matrix(rowMeans(ambi_ep))
-ambi_ep_mean = as.data.frame(ambi_ep_mean)
-ambi_ep_mean$celltype = rownames(ambi_ep_mean)
-
-#Load WCM-1 GLM output. Get vector with relative risks per centroid.
-wcm = readRDS(file.path(params$fileLoc,"Fig5/5B_cov_res.rds"))
-wcm_mat = wcm[,c("celltype","estimate")]
-wcm_mat = as.data.frame(wcm_mat)
-rownames(wcm_mat) = wcm_mat$celltype
-wcm_mat1 = as.data.frame(wcm_mat[,2])
-rownames(wcm_mat1) = rownames(wcm_mat)
-colnames(wcm_mat1) = "estimate"
-
-#Compute euclidean distances between average relative risk vectors of distal, proximal, or ambiguous samples.
-CalculateEuclideanDistance <- function(vect1, vect2) sqrt(sum((vect1 - vect2)^2))
-distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate)
-prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate)
-ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate)
-distances = c(distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate),
-              prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate),
-              ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate))
-
-#Results are saved in the distances data.frame object (figure was manually made based on this object).
-distances = as.data.frame(distances)
-distances$Vector = rownames(distances)
-DT::datatable(distances, options = list(scrollX = TRUE), caption = "Distances Table")
-```
-
-## Figure 5B - Right Panel
-```{r, fig5BR, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 6B
+```{r, fig6B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries
 library(skitools)
 
 #Load GLM output for WCM-1.
-dt.plot = readRDS(file.path(params$fileLoc,"Fig5/5B_cov_res.rds"))
+dt.plot = readRDS(file.path(params$fileLoc,"Fig6/6B_cov_res.rds"))
 dt.plot$Cell_Type = dt.plot$celltype
 dt.plot$tumor.type = "LUAD"
 
@@ -1268,12 +1234,12 @@ for (ik in in.pattern.tt)
 ``` 
 
 
-## Figure 5C
-```{r, fig5C, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 6C
+```{r, fig6C, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries. 
 library(skitools)
 #Load file with umap of cancer cells output. This allows for gathering WCM-1A and B cells. 
-tmp.plot = readRDS(file.path(params$fileLoc,"Fig5/5CD_tmp_plot_for_umap_fig5_knn6.rds"))
+tmp.plot = readRDS(file.path(params$fileLoc,"Fig6/6CD_tmp_plot_for_umap_fig6_knn6.rds"))
 
 #Filter for WCM-1 cells, split in WCM-1 A and B based on their cluster numbers.
 tmp_plot_wcm = tmp.plot[which(tmp.plot$patient=="WCM-1"),]
@@ -1285,7 +1251,7 @@ wcm1a = wcm_clusters[which(wcm_clusters$type=="WCM-1-A"),]
 wcm1b = wcm_clusters[which(wcm_clusters$type=="WCM-1-B"),]
 
 #Load aneuploidy score output from CONICSmat.
-tmp_norm = readRDS(file.path(params$fileLoc,"Fig5C_anneuploidy_zscore.rds"))
+tmp_norm = readRDS(file.path(params$fileLoc,"Fig6/Fig6C_anneuploidy_zscore.rds"))
 tmp_norm = as.data.frame(tmp_norm)
 
 #Get aneuploidy score for WCM-1 cells.
@@ -1297,18 +1263,18 @@ tmp_norm_wcm = rbind(tmp_norm_wcm1a,tmp_norm_wcm1b)
 tmp_norm_wcm = as.matrix(tmp_norm_wcm)
 
 #Generate heatmap annotation and then plot heatmap.
-row.ha = HeatmapAnnotation(Patient = wcm_clusters$type, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Patient = c("WCM-1-A"= "#00BA38", "WCM-1-B" = "#619CFF")), annotation_legend_param = list("WCM-1-A", "WCM-1-B"), which = "row")
-p = Heatmap(tmp_norm_wcm, name = 'z-score', cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold"))
+row.ha = HeatmapAnnotation(Patient = sort(wcm_clusters$type), name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Patient = c("WCM-1-A"= "#00BA38", "WCM-1-B" = "#619CFF")), annotation_legend_param = list("WCM-1-A", "WCM-1-B"), which = "row")
+p = Heatmap(tmp_norm_wcm, name = 'z-score', cluster_rows = FALSE, cluster_columns = FALSE, row_names_gp = gpar(fontsize = 9), column_names_gp = gpar(fontsize = 8), column_names_side = c("bottom"), show_column_names = TRUE, show_row_names = FALSE, column_title_gp = gpar(fontsize = 20, fontface = "bold"))  + row.ha
 print(p)
 ``` 
 
-## Figure 5D
-```{r, fig5D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 6D
+```{r, fig6D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries 
 library(skitools)
 
 #Load per cell identity labels. Remove cells with no identity.
-labels = read.table(file.path(params$fileLoc,"Fig5/5D_combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv"),sep=",",header=TRUE)
+labels = read.table(file.path(params$fileLoc,"Fig6/6D_combined_emb_for_carc_for_homogenous_sikk_ep_500_nw.csv"),sep=",",header=TRUE)
 labels$ann_finest_lev_transferred_label_filtered = ifelse(labels$ann_finest_lev_transfer_uncert<0.5,labels$ann_finest_lev_transferred_label_unfiltered,"Unknown")
 
 #Define proximal and distal cell groupings.
@@ -1317,8 +1283,8 @@ rare_sikk = c("Neuroendocrine","Tuft","Ionocyte")
 cells = c(distal_sikk,rare_sikk)
 proximal_sikk = setdiff(labels$ann_finest_lev_transferred_label_filtered,cells)
 
-#Get WCM-1 A and B cells from the carcinoma cell UMAP  (same as for Fig 5C).
-tmp.plot = readRDS(file.path(params$fileLoc,"Fig5/5CD_tmp_plot_for_umap_fig5_knn6.rds"))
+#Get WCM-1 A and B cells from the carcinoma cell UMAP  (same as for Fig 6C).
+tmp.plot = readRDS(file.path(params$fileLoc,"Fig6/6CD_tmp_plot_for_umap_fig6_knn6.rds"))
 tmp_plot_wcm = tmp.plot[which(tmp.plot$patient=="WCM-1"),]
 wcm_clusters = tmp_plot_wcm[which(tmp_plot_wcm$cluster!=1),]
 wcm_clusters[which(wcm_clusters$cluster==2),"type"]="WCM-1-A"
@@ -1366,14 +1332,14 @@ p = ggplot(result, aes(x = factor(cat), y = percentage, fill = Var1)) +
 print(p)
 ``` 
 
-## Figure 5E
-```{r, fig5E, dropBelow=TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Figure 6E
+```{r, fig6E, dropBelow=TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries
 library(skitools)
 library(EnhancedVolcano)
 
 #Load file with marker genes.
-seu.markers = readRDS(file.path(params$fileLoc,"Fig5/5E_seu_markers.rds")) 
+seu.markers = readRDS(file.path(params$fileLoc,"Fig6/6E_seu_markers.rds")) 
 
 #Filter for markers from WCM-1 A and B (based on their cluster number in the carcinoma cell umap).
 markers.1 = seu.markers[seu.markers$cluster == 2,]
@@ -1396,7 +1362,6 @@ p = EnhancedVolcano(seu.markers.mast.plot,
                     pointSize = 2)
 print(p)
 ``` 
-
 ***
 
 # Extended Data Figure 1
@@ -1461,8 +1426,8 @@ colnames(tmp.df)[2] = 'Aneuploidy.Score.mean'
 tmp.df$S.Diversity.num = exp_shannon
 
 
-#Label carcinoma cluster based on high aneuploidy and low entropy.
-tmp.df$cat = ifelse(((tmp.df$S.Diversity.num < 10) &(tmp.df$Aneuploidy.Score.mean > 40)),"Carcinoma","Others")
+#Label carcinoma clusters based on high aneuploidy and low entropy.
+tmp.df$cat = ifelse(((tmp.df$S.Diversity.num < 10) &(tmp.df$Aneuploidy.Score.mean > 40)),"Carcinoma","Non-Carcinoma")
 tmp.nw = tmp.plot[,.(Tissue,seurat_clusters)]
 tmp.nw = as.data.frame(tmp.nw)
 tmp.dt = tmp.df
@@ -1470,10 +1435,6 @@ tmp.df = as.data.frame(tmp.df)
 tmp.df = merge(tmp.df,tmp.nw,by='seurat_clusters')
 tmp.df.nw = tmp.df %>%  distinct(seurat_clusters, .keep_all = TRUE)
 tmp.df.nw = as.data.table(tmp.df.nw)
-#Add annotations for non-carcinoma clusters based on their associated tissue (tumor associated epithlial or normal).
-tmp.df.nw[which((tmp.df.nw$Tissue == "Tumor" | tmp.df.nw$Tissue == "Metastasis") & (tmp.df.nw$cat == "Others")),"cat"] = "Tumor Associated Epithelial"
-tmp.df.nw[which(tmp.df.nw$Tissue== "Adjacent Lung") & (tmp.df.nw$cat == "Others"),"cat"] = "Normal"
-tmp.df.nw[13,'cat']="Carcinoma"
 
 #Generate scatterplot for Sup 1B.
 p = ggscatter(tmp.df.nw, x = "S.Diversity.num", y = "Aneuploidy.Score.mean",
@@ -1486,14 +1447,14 @@ for(i in 1:nrow(tmp.df.nw)){
     tmp.plot[tmp.plot$seurat_clusters==tmp.df.nw$seurat_clusters[i],]$cat = tmp.df.nw$cat[i]  
     }
 #Organize cells by annotation.
-tmp.plot$cat = factor(tmp.plot$cat, levels = c("Normal","Tumor Associated Epithelial","Carcinoma"))
+tmp.plot$cat = factor(tmp.plot$cat, levels = c("Non-Carcinoma","Carcinoma"))
 tmp.plot = tmp.plot[order(tmp.plot$cat),]                   
 
 #Organize rows in aneuploidy output for heatmap.
 tmp.l.nw = tmp.l.norm[match(tmp.plot$cell,rownames(tmp.l.norm)),]
 
 #Set heatmap annotation and color.
-row.ha = HeatmapAnnotation(Tissue = tmp.plot$cat, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Tissue = c("Carcinoma" = "#F8766D", "Normal" = "#00BA38", "Tumor Associated Epithelial" = "#619CFF")), annotation_legend_param = list("Normal", "Tumor Epithelial", "Carcinoma"), which = "row")
+row.ha = HeatmapAnnotation(Tissue = tmp.plot$cat, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Tissue = c("Carcinoma" = "#F8766D", "Non-Carcinoma" = "#00BA38")), annotation_legend_param = list("Normal", "Tumor Epithelial", "Carcinoma"), which = "row")
 library(circlize)
 col_fun = colorRamp2(c(-10, 0, 10), c("blue", "white", "red"))
 #Plot heatmap.
@@ -1556,19 +1517,19 @@ tree_graph <- DiagrammeR::add_global_graph_attrs(
 # Render the left-to-right tree plot.
 DiagrammeR::render_graph(tree_graph)
 ```
-
 ***
 
 # Extended Data Figure 3
 ```{r, extfig3-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
 
-```{r, extfig3, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 3A
+```{r, extfig3a, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 #Load file with cell metadata and identity call results.
-normal_labs = fread(file.path(params$fileLoc,"EDF/EDF3/3_combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv"))
+normal_labs = fread(file.path(params$fileLoc,"EDF/EDF3/3A_combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv"))
 #Filter results based on uncertainty of identity calls. If uncertainty is lower than 0.5, label as unknown.
 normal_labs$ann_finest_lev_transferred_label_filtered = ifelse(normal_labs$ann_finest_lev_transfer_uncert < 0.5,normal_labs$ann_finest_lev_transferred_label_unfiltered,"Unknown")
 #Filter for identity call results and true identity labels.
@@ -1629,20 +1590,14 @@ p = ggplot(acc_mat, aes(x = cat, y = V1)) +
   theme_minimal() + coord_flip()
 print(p)
 ```
-***
 
-# Extended Data Figure 4
-
-```{r, extfig4-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
-```
-
-## Extended Data Figure 4A
-```{r, extfig4A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 3B - Left Panel
+```{r, extfig3BLeft, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load required libraries.
 library(skitools)
 
 #Load GRanges with centroid expression data.
-juan.genes.gr.nw = readRDS(file.path(params$fileLoc,"EDF/EDF4/4B_genes_gr_LUSC.rds"))
+juan.genes.gr.nw = readRDS(file.path(params$fileLoc,"EDF/EDF3/3BLP_genes_gr_LUAD.rds"))
 juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
 
 #Define quantiles for partitioning the genes by basal resting expression.
@@ -1663,9 +1618,9 @@ highsup.quant$Quart = 'Q3'
 sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
 
 #Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
-mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF4/4AB_mgenes.rds"))
+mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF3/3B_mgenes.rds"))
 mgenes2 <- copy(mgenes)
-juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*53)
+juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*246)
 
 #Make sure quantile data.frame gene order matches snv counts GRanges gene order. Remove NAs. Then add gene mutational density information for LUAD to the data.frame.
 supLUSC_centwrtTMB = sup.quart.mat[match(juan.genes.gr.nw.dt$gene_name,sup.quart.mat$gene),]
@@ -1763,13 +1718,13 @@ p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 ```
 
-## Extended Data Figure 4B
-```{r, extfig4B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 3B - Right Panel
+```{r, extfig3BRight, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load required libraries.
 library(skitools)
 
 #Load GRanges with centroid expression data.
-juan.genes.gr.nw = readRDS(file.path(params$fileLoc,"EDF/EDF4/4B_genes_gr_LUSC.rds"))
+juan.genes.gr.nw = readRDS(file.path(params$fileLoc,"EDF/EDF3/3BRP_genes_gr_LUSC.rds"))
 juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
 
 #Define quantiles for partitioning the genes by basal resting expression.
@@ -1790,7 +1745,7 @@ highsup.quant$Quart = 'Q3'
 sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
 
 #Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
-mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF4/4AB_mgenes.rds"))
+mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF3/3B_mgenes.rds"))
 mgenes2 <- copy(mgenes)
 juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*53)
 
@@ -1889,23 +1844,17 @@ p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 
 print(p)
 ```
-***
 
-# Extended Data Figure 5
-
-```{r, extfig5-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
-```
-
-## Extended Data Figure 5A
-```{r, extfig5A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 3C - Left Panel
+```{r, extfig3CLeft, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds"))
-dt2 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds"))
-dt3 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds"))
+dt1 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds"))
+dt2 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds"))
+dt3 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds"))
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with tobacco counts per patient. Save with pair ID as data.table.
@@ -1915,7 +1864,7 @@ count.int$pair = gsub("snv.tob.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_new.pairs.luad.rds"))
+luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -1931,7 +1880,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_epcells.rds"))
+sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -2000,16 +1949,16 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 ```
 
-## Extended Data Figure 5B
-```{r, extfig5B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 3C - Center Panel
+```{r, extfig3CCenter, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds"))
-dt2 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds"))
-dt3 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds"))
+dt1 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds"))
+dt2 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds"))
+dt3 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds"))
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with aging counts per patient. Save with pair ID as data.table.
@@ -2019,7 +1968,7 @@ count.int$pair = gsub("snv.aging.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_new.pairs.luad.rds"))
+luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -2035,7 +1984,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_epcells.rds"))
+sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -2104,16 +2053,16 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 ```
 
-## Extended Data Figure 5C
-```{r, extfig5C, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data 3C - Right Panel
+```{r, extfig5CRight, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds"))
-dt2 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds"))
-dt3 = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds"))
+dt1 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds"))
+dt2 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds"))
+dt3 = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds"))
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with apobec counts per patient. Save with pair ID as data.table.
@@ -2123,7 +2072,7 @@ count.int$pair = gsub("snv.apobec.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_new.pairs.luad.rds"))
+luad_pairs = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_new.pairs.luad.rds"))
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -2139,7 +2088,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF5/5ABC_epcells.rds"))
+sikk.cent = readRDS(file.path(params$fileLoc,"EDF/EDF3/3C_epcells.rds"))
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -2208,18 +2157,14 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 ```
 
-# Extended Data Figure 6
-
-```{r, extfig6-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
-```
-
-```{r, extfig6, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+##  Extended Data 3D
+```{r, extfig3D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 # Accuracy for predicting true cell type at different levels 
 
-sims_acc_results <- fread(file.path(params$fileLoc,'EDF/EDF6/6_luad_sims_results.csv'))
+sims_acc_results <- fread(file.path(params$fileLoc,'EDF/EDF3/3D_luad_sims_results.csv'))
 
 # accuracy at level finest
 p1_5 <- ggplot(sims_acc_results[, .(celltype, accuracy_level_finest)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level_finest)) +
@@ -2264,29 +2209,25 @@ p1_1 <- ggplot(sims_acc_results[, .(celltype, accuracy_leveldnd)] %>% as.data.fr
 p_acc <- ggpubr::ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, ncol = 3, nrow = 2)
 print(p_acc)
 ```
-***
 
-# Extended Data Figure 7
-
-```{r, extfig7-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
-```
-```{r, extfig7, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "80%", fig.align = "center"}
+# Extended Data Figure 3E
+```{r, extfig3E, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 #Plots can be made for univariate and multivariate simultaneously or individually. Comments are made when relevant to do one or the other.
 
 #Load simulation result files. Add Method column to identify if results are uni or multivariate.
-resDT = readRDS(file.path(params$fileLoc,"EDF/EDF7/7_testRun_withOverlap_Cov.rds"))
+resDT = readRDS(file.path(params$fileLoc,"EDF/EDF3/3E_testRun_withOverlap_Cov.rds"))
 resDT$Method = "Univariate"
 
 #If results are plotted in the same graph, uncomment the following lines, adjusting the Method column value accordingly. 
-#MulDT = readRDS(file.path(params$fileLoc,"EDF/EDF7/7_testRun_withOverlapMultivariatewithCovs.rds"))
+#MulDT = readRDS(file.path(params$fileLoc,"EDF/EDF3/3E_testRun_withOverlapMultivariatewithCovs.rds"))
 # MulDT$Method = "Multivariate"
 #resDT = rbind(resDT,MulDT,fill=TRUE)
 
 #Load csv with Sikkema annotations.
-annotSikk = read.csv(file.path(params$fileLoc,"EDF/EDF7/7_sikk_meta_epi3.csv"))
+annotSikk = read.csv(file.path(params$fileLoc,"EDF/EDF3/3E_sikk_meta_epi3.csv"))
 #Add proximal and distal annotations.
 annotSikk$ann_level_PD = ifelse(grepl("^AT",annotSikk$ann_finest_level),"Proximal","Distal")
 
@@ -2323,27 +2264,27 @@ resDT$Lev_Hit = as.numeric(resDT$Lev_Hit)
 average_df = resDT %>% group_by(TMB) %>% dplyr::summarise(average_value = mean(Lev_Hit, na.rm = TRUE))  
 average_df = as.data.frame(average_df)  
 
-#Line graph is plotted. Depending on whether both uni and multivariate are plotted use the first line or the second (comment/uncomment adequately).
+#Line graph is plotted. Depending on whether both uni and multivariate are plotted use the first line or the second respectively (comment/uncomment).
 p =  ggplot(data=average_df, aes(x=log10(TMB), y=average_value)) + geom_line(color="blue")+ geom_point() + ggtitle("Accuracy per TMB Multivariate - Proximal vs Distal" ) + xlab("Log10(TMB) (mut/mb)") + ylab("Accuracy") + scale_y_continuous(limits=c(0,1)) +   theme(text = element_text(size = 20)) 
 #p =  ggplot(data=average_df, aes(x=log10(TMB), y=average_value, color = Method, group=Method)) + geom_line(color="red")+ geom_point(aes(shape=Method),size=2) + ggtitle("Accuracy per TMB - Celltype" ) + xlab("Log10(TMB) (mut/mb)") + ylab("Accuracy") + scale_y_continuous(limits=c(0,1)) +   theme(text = element_text(size = 20)) +  scale_color_manual(values = c("Univariate" = "red", "Multivariate" = "blue")) 
 print(p)
 ```
 ***
 
-# Extended Data Figure 8
+# Extended Data Figure 4
 
-```{r, extfig8-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
+```{r, extfig4-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
 
-## Extended Data Figure 8A
-```{r, extfig8A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 4A
+```{r, extfig4A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libaries.
 library(skitools)
 
 # Heat map for LUSC 
 
-nsclc_col <- readRDS(file.path(params$fileLoc,'EDF/EDF8/8A_nsclc_hm_col.rds'))
-hm_lusc <- fread(file.path(params$fileLoc,'EDF/EDF8/8A_hm_lusc.csv'))
+nsclc_col <- readRDS(file.path(params$fileLoc,'EDF/EDF4/4A_nsclc_hm_col.rds'))
+hm_lusc <- fread(file.path(params$fileLoc,'EDF/EDF4/4A_hm_lusc.csv'))
 hm_lusc <- hm_lusc %>% as.data.frame()
 column_ha2 = HeatmapAnnotation(
   sbs4 = anno_barplot(hm_lusc[,25], gp = gpar(col = "red", fill = "#FF0000")),
@@ -2367,12 +2308,12 @@ Heatmap(t(hm_lusc[,1:23]), name = "Relative Risk", col = nsclc_col, cluster_rows
             show_parent_dend_line = FALSE, column_gap = unit(c(4), "mm"), column_title = NULL, border = TRUE)
 ```
 
-## Extended Data Figure 8B
-```{r, extfig8B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 4B
+```{r, extfig4B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libaries.
 library(skitools)
 # LUSC - Cluster 1 Distal Lung
-edf_8_data <- readRDS(file.path(params$fileLoc,'EDF/EDF8/8B_data.rds'))
+edf_8_data <- readRDS(file.path(params$fileLoc,'EDF/EDF4/4B_data.rds'))
 ggplot(edf_8_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
@@ -2419,15 +2360,15 @@ ggplot(edf_8_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
 ```
 ***
 
-# Extended Data Figure 9
-```{r, extfig9-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
+# Extended Data Figure 5
+```{r, extfig5-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
-## Extended Data Figure 9A
-```{r, extfig9A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5A
+```{r, extfig5A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
-pts_coo_id_edf9a <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9A_pts_coo_id.rds'))
+pts_coo_id_edf9a <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5A_pts_coo_id.rds'))
 pts_coo_id_edf9a$Lineage_plasticity <- ''
 pts_coo_id_edf9a[Identity == 'Distal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
 pts_coo_id_edf9a[Identity == 'Proximal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
@@ -2453,13 +2394,13 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
   guides(fill = guide_legend(title = 'Fig 4C - Lineage plasticity fraction')) + theme(legend.position = "bottom")
 ```
 
-## Extended Data Figure 9B
-```{r, extfig9B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5B
+```{r, extfig5B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 library(ggsankey)
 
-tmp.plot.luad.df3 <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9B_data.rds'))
+tmp.plot.luad.df3 <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5B_data.rds'))
 
 tmp.plot.luad.pl <- ggplot(tmp.plot.luad.df3, aes(x = x,                        
                                                   next_x = next_x,                                     
@@ -2487,12 +2428,12 @@ tmp.plot.luad.pl <- tmp.plot.luad.pl + labs(fill = 'Nodes')
 tmp.plot.luad.pl
 ```
 
-## Extended Data Figure 9C
-```{r, extfig9C, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5C
+```{r, extfig5C, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
-edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9CDEF_data.rds'))
+edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5CDEF_data.rds'))
 
 ik <-  'Papillary'
 
@@ -2530,13 +2471,13 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'Identity')) + theme(legend.position = "top")
 ```
 
-## Extended Data Figure 9D
-```{r, extfig9D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5D
+```{r, extfig5D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 # by Identity 
-edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9CDEF_data.rds'))
+edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5CDEF_data.rds'))
 
 ik <-  'NSCLC_NOS'
 
@@ -2573,14 +2514,14 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'Identity')) + theme(legend.position = "top")
 ```
 
-## Extended Data Figure 9E
-```{r, extfig9E, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5E
+```{r, extfig5E, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
 # NSCLC-NOS vs TP53
 
-edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9CDEF_data.rds'))
+edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5CDEF_data.rds'))
 
 ik <-  'NSCLC_NOS'
 
@@ -2617,12 +2558,12 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'TP53 status')) + theme(legend.position = "top")
 ```
 
-## Extended Data Figure 9F
-```{r, extfig9F, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5F
+```{r, extfig5F, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
-edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9CDEF_data.rds'))
+edf9 <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5CDEF_data.rds'))
 
 ik = 'mut_tp53_hist'
 freq.plot.tmp.f = edf9
@@ -2657,64 +2598,123 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'Histology')) + theme(legend.position = "top")
 ```
 
-## Extended Data Figure 9G
-```{r, extfig9G, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 5G
+```{r, extfig5G, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 library(skitools)
-
-edf9g_a <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9G_dataA.rds'))
-edf9g_b <- readRDS(file.path(params$fileLoc,'EDF/EDF9/9G_dataB.rds'))
-
-oncoprint(edf9g_b, oncotab = edf9g_a,  genes = c('NKX2-1','SMARCA4','STK11','APC','KEAP1','ALK','MCL1','MAP2K1','EGFR','FGFR1','FOXP1','CDK6','BCL2L1', 'TP53','RB1','CDKN2A','TERT','MYC','ARID1A','PTEN','CCND1','PIK3CA','ERBB2','CCNE1','NF1'), sort.genes = FALSE, colnames.fontsize = 20, 
+#Load libraries.
+edf5g_a <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5G_dataA.rds'))
+edf5g_b <- readRDS(file.path(params$fileLoc,'EDF/EDF5/5G_dataB.rds'))
+#Load oncoprint data and plot.
+oncoprint(edf5g_b, oncotab = edf5g_a,  genes = c('NKX2-1','SMARCA4','STK11','APC','KEAP1','ALK','MCL1','MAP2K1','EGFR','FGFR1','FOXP1','CDK6','BCL2L1', 'TP53','RB1','CDKN2A','TERT','MYC','ARID1A','PTEN','CCND1','PIK3CA','ERBB2','CCNE1','NF1'), sort.genes = FALSE, colnames.fontsize = 20, 
           rownames.fontsize = 15, signature.thresh = 20, track.height = 1.5, split.gap = 0.5, wes = TRUE, track.gap = track.height/2, drop = TRUE, drop.genes = TRUE, svevents = FALSE,  sort.tumors = FALSE, return.oncotab = FALSE, height = 12, width = 25,  filename = 'EDF9g_onco.pdf')
 ```
 
 ***
 
-# Extended Data Figure 10
-```{r, extfig10-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
+# Extended Data Figure 6
+```{r, extfig6-lead, dropAboveExp=TRUE, results = "asis", echo = FALSE}
 ```
 
-## Extended Data Figure 10A
-```{r, extfig10A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 6A
+```{r, fig6A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+#Load libraries
+library(skitools)
+library(parallel)
+library(MASS)
+
+#Load csv with relative risk information per centroid for every sample.
+rel_risk = read.table(file.path(params$fileLoc,"EDF/EDF6/6A_luad_rel_risk.csv"),sep=",",header=T,row.names=1)
+
+#Group samples based on Distal, Proximal, or Ambiguous COO calls. Compute mean relative risk for each.
+#Distal
+distal = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Distal Lung"),]
+distal_ep = distal[,1:23]
+distal_ep = t(distal_ep)
+distal_ep_mean = as.matrix(rowMeans(distal_ep))
+distal_ep_mean = as.data.frame(distal_ep_mean)
+distal_ep_mean$celltype = rownames(distal_ep_mean)
+#Proximal
+proximal = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Proximal Lung"),]
+proximal_ep = proximal[,1:23]
+proximal_ep = t(proximal_ep)
+proximal_ep_mean = as.matrix(rowMeans(proximal_ep))
+proximal_ep_mean = as.data.frame(proximal_ep_mean)
+proximal_ep_mean$celltype = rownames(proximal_ep_mean)
+#Ambiguous
+ambi = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Ambiguous"),]
+ambi_ep = ambi[,1:23]
+ambi_ep = t(ambi_ep)
+ambi_ep_mean = as.matrix(rowMeans(ambi_ep))
+ambi_ep_mean = as.data.frame(ambi_ep_mean)
+ambi_ep_mean$celltype = rownames(ambi_ep_mean)
+
+#Load WCM-1 GLM output. Get vector with relative risks per centroid.
+wcm = readRDS(file.path(params$fileLoc,"EDF/EDF6/6A_cov_res.rds"))
+wcm_mat = wcm[,c("celltype","estimate")]
+wcm_mat = as.data.frame(wcm_mat)
+rownames(wcm_mat) = wcm_mat$celltype
+wcm_mat1 = as.data.frame(wcm_mat[,2])
+rownames(wcm_mat1) = rownames(wcm_mat)
+colnames(wcm_mat1) = "estimate"
+
+#Compute euclidean distances between average relative risk vectors of distal, proximal, or ambiguous samples.
+CalculateEuclideanDistance <- function(vect1, vect2) sqrt(sum((vect1 - vect2)^2))
+distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate)
+prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate)
+ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate)
+distances = c(distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate),
+              prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate),
+              ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate))
+
+#Results are saved in the distances data.frame object (figure was manually made based on this object).
+distances = as.data.frame(distances)
+distances$Vector = rownames(distances)
+DT::datatable(distances, options = list(scrollX = TRUE), caption = "Distances Table")
+```
+
+## Extended Data Figure 6B
+```{r, extfig6B, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
-tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF10/10AB_data.rds"))
+tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF6/6BC_data.rds"))
 
-highlight_color <- "darkslategray3"  # Color for WCM-1
-grey_color <- "grey"        # Color for other patients
+#Set color column and define a color map.
+tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", "WCM-1", "Other cases")
+colMap = c("WCM-1"="darkslategray3","Other cases"="grey")
 
-tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", highlight_color, grey_color)
-
+#Plot.
 p <- ggplot(tmp.plot, aes(x, y, colour = color), size = 3) + 
   geom_point() + 
   theme_bw() + 
   theme(legend.position = "top") +
-  scale_colour_identity()
+  scale_color_manual(values=colMap)+
+  theme(legend.title=element_blank())
 print(p)
 ```
 
-## Extended Data Figure 10B
-```{r, extfig10B, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
+## Extended Data Figure 6C
+```{r, extfig6C, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 library(RColorBrewer)
+tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF6/6BC_data.rds"))
 
-tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF10/10AB_data.rds"))
-
+#Define color column and color map.
 my_colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(tmp.plot$cluster)))
-my_colors[1] <- 'turquoise4'
-my_colors[2] <- 'mediumseagreen'
-my_colors[3] <- 'darkred'
-names(my_colors) <- unique(tmp.plot$cluster)
-tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", my_colors[tmp.plot$cluster], "grey")
-p <- ggplot(tmp.plot, aes(x = x, y = y, colour = factor(cluster)), size = 3) + 
-  geom_point(aes(color = ifelse(patient == "WCM-1", as.character(cluster), "Other"))) + 
-  scale_color_manual(values = c(my_colors, Other = "grey"), 
-                     breaks = c(names(my_colors), "Other"),
-                     labels = c(names(my_colors), "Other Patients")) +
+tmp.plot$color = "Other cases"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==2] = "WCM-1-A"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==3] = "WCM-1-B"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==1] = "WCM-1 others"
+colMap = c("WCM-1-A"="mediumseagreen","WCM-1-B"="darkred","WCM-1 others"="turquoise4","Other cases"="grey")
+
+#Plot.
+p <- ggplot(tmp.plot, aes(x = x, y = y, color = color), size = 3) + 
+  geom_point() + 
+  scale_color_manual(values=colMap) +
   theme_bw() + 
-  theme(legend.position = "top") 
+  theme(legend.position = "top") +
+  theme(legend.title=element_blank())
 print(p)
 ```
 ***
