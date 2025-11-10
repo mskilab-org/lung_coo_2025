@@ -1292,8 +1292,8 @@ my_colors[2] <- 'mediumseagreen'
 my_colors[3] <- 'darkred'
 names(my_colors) <- unique(tmp.plot$cluster)
 tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", my_colors[tmp.plot$cluster], "grey")
-p <- ggplot(tmp.plot, aes(x = x, y = y, colour = factor(cluster)), size = 3) + 
-  geom_point(aes(color = ifelse(patient == "WCM-1", as.character(cluster), "Other"))) + 
+p <- ggplot(tmp.plot, aes(x = x, y = y, color = factor(cluster)), size = 3) + 
+    geom_point() + 
   scale_color_manual(values = c(my_colors, Other = "grey"), 
                      breaks = c(names(my_colors), "Other"),
                      labels = c(names(my_colors), "Other Patients")) +
