@@ -2,7 +2,7 @@
 
 # Introduction
 
-This github serves as a repository for the data and code associated to the manuscript entitled: _Passenger mutations link cellular origin and transcriptional identity in human lung adenocarcinomas_, currently in revision.
+This github serves as a repository for the data and code associated to the manuscript entitled: _Passenger mutations link cellular origin and transcriptional identity in human lung adenocarcinomas_, to be published on Nature Genetics.
 
 The repository is composed of 2 folders: `data` and `R`, which contain the files and code required to reproduce the figures within the manuscript. Note that certain figures were further modified via Illustrator to improve legibility and/or presentation, so in some instance the specific styling (e.g.: colors) don't correspond completely between the manuscript figures and the ones shown here.
 
