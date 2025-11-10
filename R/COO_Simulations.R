@@ -1,7 +1,7 @@
-## The code below runs the simulations which were used for the plots of extended data figures 6 and 7.
-## For figure 6, only the univariate simulation code is used, with a fixed TMB of 2430 and 1000 iterations.
+## The code below runs the simulations which were used for the plots of Extended Data Figure 3D and 3E.
+## For Extended Data Figure 3D, only the univariate simulation code is used, with a fixed TMB of 2430 and 1000 iterations.
 ## To run said code make sure to comment line 44 below and uncomment line 47. The number of iterations for that single TMB can be changed in line 53.
-## For figure 7, both univariate and multivariate code is used, with a variable TMB. The code can be ran without modifications for this approach.
+## For Extended Data Figure 3E, both univariate and multivariate code is used, with a variable TMB. The code can be ran without modifications for this approach.
 ## Note that this code assumes that it is being run within the R folder of this repository. If it isn't, make sure to adjust the file paths on lines 14 and 171 so the GRanges used for
 ## for the simulations (located in the data folder) are loaded correctly.
 
