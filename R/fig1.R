@@ -1,3 +1,20 @@
+## Figure 1B ##
+#Load libraries.
+library(skitools)
+
+#Load umap coordinates and cell identity information.
+umap_coord = read.table("../data/Fig1/1B_umap_coordinates.csv",sep=",",header=TRUE)
+
+#Assign alpha and color values and plot.
+umap_coord$alpha = ifelse((umap_coord$subtype == "LUAD" | umap_coord$subtype == "LUSC" | umap_coord$subtype == "LCNEC"), 0.3, 1)
+colMap = c('AT1'='#C49A02', 'AT2'='#F1C40F', 'Basal'='#2CA02C', 'Multiciliated lineage'='#3C3C1D', 'Secretory'='#1F6B2A', 'Submucosal Secretory'='#7DDC75', 'Neuroendocrine'= '#8E44AD', 'Rare'='#CE5DAE', 'LUAD'='#E75480', 'LUSC'='#6A83FF', 'LCNEC'='#301934')
+
+p = ggplot(umap_coord, aes(UMAP1, UMAP2, color = subtype)) +
+  geom_point(aes(alpha = alpha), size = 1) +
+  scale_color_manual(values = colMap) +
+  theme_minimal()
+print(p)
+
 ## Figure 1C ##
 #Load libraries.
 library(skitools)
