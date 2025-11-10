@@ -1259,22 +1259,22 @@ DT::datatable(distances, options = list(scrollX = TRUE), caption = "Distances Ta
 # ------------------------------------------------------------------------------------------------
 # EDF 6B 
 # ------------------------------------------------------------------------------------------------
-```{r, extfig10A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
-tmp.plot = readRDS("../data/EDF/EDF6/6BC_data.rds")
+tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF6/6BC_data.rds"))
 
-highlight_color <- "darkslategray3"  # Color for WCM-1
-grey_color <- "grey"        # Color for other patients
+#Set color column and define a color map.
+tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", "WCM-1", "Other cases")
+colMap = c("WCM-1"="darkslategray3","Other cases"="grey")
 
-tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", highlight_color, grey_color)
-
+#Plot.
 p <- ggplot(tmp.plot, aes(x, y, colour = color), size = 3) + 
   geom_point() + 
   theme_bw() + 
   theme(legend.position = "top") +
-  scale_colour_identity()
+  scale_color_manual(values=colMap)+
+  theme(legend.title=element_blank())
 print(p)
                      
 # ------------------------------------------------------------------------------------------------
@@ -1283,20 +1283,21 @@ print(p)
 #Load libraries.
 library(skitools)
 library(RColorBrewer)
+tmp.plot = readRDS(file.path(params$fileLoc,"EDF/EDF6/6BC_data.rds"))
 
-tmp.plot = readRDS("../data/EDF/EDF6/6BC_data.rds")
-
+#Define color column and color map.
 my_colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(tmp.plot$cluster)))
-my_colors[1] <- 'turquoise4'
-my_colors[2] <- 'mediumseagreen'
-my_colors[3] <- 'darkred'
-names(my_colors) <- unique(tmp.plot$cluster)
-tmp.plot$color <- ifelse(tmp.plot$patient == "WCM-1", my_colors[tmp.plot$cluster], "grey")
-p <- ggplot(tmp.plot, aes(x = x, y = y, color = factor(cluster)), size = 3) + 
-    geom_point() + 
-  scale_color_manual(values = c(my_colors, Other = "grey"), 
-                     breaks = c(names(my_colors), "Other"),
-                     labels = c(names(my_colors), "Other Patients")) +
+tmp.plot$color = "Other cases"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==2] = "WCM-1A"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==3] = "WCM-1B"
+tmp.plot$color[tmp.plot$patient == "WCM-1" & tmp.plot$cluster==1] = "WCM-1 others"
+colMap = c("WCM-1A"="mediumseagreen","WCM-1B"="darkred","WCM-1 others"="turquoise4","Other cases"="grey")
+
+#Plot.
+p <- ggplot(tmp.plot, aes(x = x, y = y, color = color), size = 3) + 
+  geom_point() + 
+  scale_color_manual(values=colMap) +
   theme_bw() + 
-  theme(legend.position = "top") 
+  theme(legend.position = "top") +
+  theme(legend.title=element_blank())
 print(p)
