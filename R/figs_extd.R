@@ -773,15 +773,16 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
     legend.box.background = element_rect(fill = 'transparent')
   )+ labs(x = "Expression", y = "Mean TMB for apobec")+ theme(legend.position = "none")
 
-print(p)                                                         
+print(p)
+
 # ------------------------------------------------------------------------------------------------
-# EDF 6
+# EDF 3D
 # ------------------------------------------------------------------------------------------------
 #Load libraries
 library(skitools)
 
 # Accuracy for predicting true cell type at different levels 
-sims_acc_results <- fread('../data/EDF/EDF6/6_luad_sims_results.csv')
+sims_acc_results <- fread('../data/EDF/EDF3/3D_luad_sims_results.csv')
 
 # accuracy at level finest
 p1_5 <- ggplot(sims_acc_results[, .(celltype, accuracy_level_finest)] %>% as.data.frame(), aes(x = celltype, y = accuracy_level_finest)) +
@@ -825,8 +826,9 @@ p1_1 <- ggplot(sims_acc_results[, .(celltype, accuracy_leveldnd)] %>% as.data.fr
 
 p_acc <- ggpubr::ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, ncol = 3, nrow = 2)
 print(p_acc)
+
 # ------------------------------------------------------------------------------------------------
-# EDF 7
+# EDF 3E
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
@@ -834,16 +836,16 @@ library(skitools)
 #Plots can be made for univariate and multivariate simultaneously or individually. Comments are made when relevant to do one or the other.
 
 #Load simulation result files. Add Method column to identify if results are uni or multivariate.
-resDT = readRDS("../data/EDF/EDF7/7_testRun_withOverlap_Cov.rds")
+resDT = readRDS("../data/EDF/EDF3/3E_testRun_withOverlap_Cov.rds")
 resDT$Method = "Univariate"
 
 #If results are plotted in the same graph, uncomment the following lines, adjusting the Method column value accordingly. 
-#MulDT = readRDS(file.path(params$fileLoc,"EDF/EDF7/7_testRun_withOverlapMultivariatewithCovs.rds"))
+#MulDT = readRDS(file.path(params$fileLoc,"EDF/EDF3/3E_testRun_withOverlapMultivariatewithCovs.rds"))
 # MulDT$Method = "Multivariate"
 #resDT = rbind(resDT,MulDT,fill=TRUE)
 
 #Load csv with Sikkema annotations.
-annotSikk = read.csv("../data/EDF/EDF7/7_sikk_meta_epi3.csv")
+annotSikk = read.csv("../data/EDF/EDF3/3E_sikk_meta_epi3.csv")
 #Add proximal and distal annotations.
 annotSikk$ann_level_PD = ifelse(grepl("^AT",annotSikk$ann_finest_level),"Proximal","Distal")
 
@@ -886,14 +888,14 @@ p =  ggplot(data=average_df, aes(x=log10(TMB), y=average_value)) + geom_line(col
 print(p)
 
 # ------------------------------------------------------------------------------------------------
-# EDF 8A
+# EDF 4A
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 
 # Heat map for LUSC 
-nsclc_col <- readRDS('../data/EDF/EDF8/8A_nsclc_hm_col.rds')
-hm_lusc <- fread('../data/EDF/EDF8/8A_hm_lusc.csv')
+nsclc_col <- readRDS('../data/EDF/EDF4/4A_nsclc_hm_col.rds')
+hm_lusc <- fread('../data/EDF/EDF4/4A_hm_lusc.csv')
 hm_lusc <- hm_lusc %>% as.data.frame()
 column_ha2 = HeatmapAnnotation(
   sbs4 = anno_barplot(hm_lusc[,25], gp = gpar(col = "red", fill = "#FF0000")),
@@ -916,12 +918,12 @@ Heatmap(t(hm_lusc[,1:23]), name = "Relative Risk", col = nsclc_col, cluster_rows
             column_names_side = c("bottom"), show_column_names = FALSE, column_km = 4, column_km_repeats = 100, top_annotation = column_ha2,
             show_parent_dend_line = FALSE, column_gap = unit(c(4), "mm"), column_title = NULL, border = TRUE)
 # ------------------------------------------------------------------------------------------------
-# EDF 8B
+# EDF 4B
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 # LUSC - Cluster 1 Distal Lung
-edf_8_data <- readRDS('../data/EDF/EDF8/8B_data.rds')
+edf_8_data <- readRDS('../data/EDF/EDF4/4B_data.rds')
 ggplot(edf_8_data[cluster == 'Distal'], aes(x = reorder(celltype,estimate), y = estimate, fill = Cell_Class)) +
   geom_bar(stat = "identity", alpha = 0.9) +
   scale_fill_manual(values = c("grey")) +
@@ -967,12 +969,12 @@ ggplot(edf_8_data[cluster == 'Proximal_2'], aes(x = reorder(celltype,estimate), 
   coord_flip()
 
 # ------------------------------------------------------------------------------------------------
-# EDF 9A
+# EDF 5A
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 
-pts_coo_id_edf9a <- readRDS('../data/EDF/EDF9/9A_pts_coo_id.rds')
+pts_coo_id_edf9a <- readRDS('../data/EDF/EDF5/5A_pts_coo_id.rds')
 pts_coo_id_edf9a$Lineage_plasticity <- ''
 pts_coo_id_edf9a[Identity == 'Distal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage conserved'
 pts_coo_id_edf9a[Identity == 'Proximal Lung' & Origin == 'Distal Lung' ]$Lineage_plasticity <- 'Lineage plasticity'
@@ -998,13 +1000,13 @@ ggplot(res.plot, aes(x = TP53_mut, y = fracprox, fill = TP53_mut)) +
   guides(fill = guide_legend(title = 'Fig 4C - Lineage plasticity fraction')) + theme(legend.position = "bottom")
 
 # ------------------------------------------------------------------------------------------------
-# EDF 9B
+# EDF 5B
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 library(ggsankey)
 
-tmp.plot.luad.df3 <- readRDS('../data/EDF/EDF9/9B_data.rds')
+tmp.plot.luad.df3 <- readRDS('../data/EDF/EDF5/5B_data.rds')
 
 tmp.plot.luad.pl <- ggplot(tmp.plot.luad.df3, aes(x = x,                        
                                                   next_x = next_x,                                     
@@ -1031,12 +1033,12 @@ tmp.plot.luad.pl <- tmp.plot.luad.pl + labs(subtitle = "LUAD")
 tmp.plot.luad.pl <- tmp.plot.luad.pl + labs(fill = 'Nodes')
 tmp.plot.luad.pl
 # ------------------------------------------------------------------------------------------------
-# EDF 9C
+# EDF 5C
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 
-edf9 <- readRDS('../data/EDF/EDF9/9CDEF_data.rds')
+edf9 <- readRDS('../data/EDF/EDF5/5CDEF_data.rds')
 
 ik <-  'Papillary'
 freq.plot.tmp.f = edf9
@@ -1070,13 +1072,13 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'Identity')) + theme(legend.position = "top")
 
 # ------------------------------------------------------------------------------------------------
-# EDF 9D
+# EDF 5D
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 
 # by Identity 
-edf9 <- readRDS('../data/EDF/EDF9/9CDEF_data.rds')
+edf9 <- readRDS('../data/EDF/EDF5/5CDEF_data.rds')
 
 ik <-  'NSCLC_NOS'
 freq.plot.tmp.f = edf9
@@ -1109,13 +1111,13 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = 'Identity')) + theme(legend.position = "top")
 # ------------------------------------------------------------------------------------------------
-# EDF 9E
+# EDF 5E
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 
 # NSCLC-NOS vs TP53
-edf9 <- readRDS('../data/EDF/EDF9/9CDEF_data.rds')
+edf9 <- readRDS('../data/EDF/EDF5/5CDEF_data.rds')
 ik <-  'NSCLC_NOS'
 freq.plot.tmp.f = edf9
                      
@@ -1146,13 +1148,14 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
         axis.ticks.x = element_blank()) + 
   geom_text(mapping = aes(x = clust.int, y = ci.upper + 0.05, label = paste0(nmut, '/', tot)), size = 7) +
   guides(fill = guide_legend(title = 'TP53 status')) + theme(legend.position = "top")
+
 # ------------------------------------------------------------------------------------------------
-# EDF 9F
+# EDF 5F
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 
-edf9 <- readRDS('../data/EDF/EDF9/9CDEF_data.rds')
+edf9 <- readRDS('../data/EDF/EDF5/5CDEF_data.rds')
 
 ik = 'mut_tp53_hist'
 freq.plot.tmp.f = edf9
@@ -1185,23 +1188,82 @@ ggplot(res.plot, aes(x = clust.int, y = fracmut, fill = clust.int)) +
   guides(fill = guide_legend(title = 'Histology')) + theme(legend.position = "top")
 
 # ------------------------------------------------------------------------------------------------
-# EDF 9G
+# EDF 5G
 # ------------------------------------------------------------------------------------------------
+#Load libraries.
 library(skitools)
+#Load oncoprint data and plot.
+edf5g_a <- readRDS('../data/EDF/EDF5/5G_dataA.rds')
+edf5g_b <- readRDS('../data/EDF/EDF5/5G_dataB.rds')
 
-edf9g_a <- readRDS('../data/EDF/EDF9/9G_dataA.rds')
-edf9g_b <- readRDS('../data/EDF/EDF9/9G_dataB.rds')
-
-oncoprint(edf9g_b, oncotab = edf9g_a,  genes = c('NKX2-1','SMARCA4','STK11','APC','KEAP1','ALK','MCL1','MAP2K1','EGFR','FGFR1','FOXP1','CDK6','BCL2L1', 'TP53','RB1','CDKN2A','TERT','MYC','ARID1A','PTEN','CCND1','PIK3CA','ERBB2','CCNE1','NF1'), sort.genes = FALSE, colnames.fontsize = 20, 
+oncoprint(edf5g_b, oncotab = edf5g_a,  genes = c('NKX2-1','SMARCA4','STK11','APC','KEAP1','ALK','MCL1','MAP2K1','EGFR','FGFR1','FOXP1','CDK6','BCL2L1', 'TP53','RB1','CDKN2A','TERT','MYC','ARID1A','PTEN','CCND1','PIK3CA','ERBB2','CCNE1','NF1'), sort.genes = FALSE, colnames.fontsize = 20, 
           rownames.fontsize = 15, signature.thresh = 20, track.height = 1.5, split.gap = 0.5, wes = TRUE, track.gap = track.height/2, drop = TRUE, drop.genes = TRUE, svevents = FALSE,  sort.tumors = FALSE, return.oncotab = FALSE, height = 12, width = 25,  filename = 'EDF9g_onco.pdf')
+
 # ------------------------------------------------------------------------------------------------
-# EDF 10 A 
+# EDF 6A
+# ------------------------------------------------------------------------------------------------
+#Load libraries
+library(skitools)
+library(parallel)
+library(MASS)
+
+#Load csv with relative risk information per centroid for every sample.
+rel_risk = read.table(file.path(params$fileLoc,"EDF/EDF6/6A_luad_rel_risk.csv"),sep=",",header=T,row.names=1)
+
+#Group samples based on Distal, Proximal, or Ambiguous COO calls. Compute mean relative risk for each.
+#Distal
+distal = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Distal Lung"),]
+distal_ep = distal[,1:23]
+distal_ep = t(distal_ep)
+distal_ep_mean = as.matrix(rowMeans(distal_ep))
+distal_ep_mean = as.data.frame(distal_ep_mean)
+distal_ep_mean$celltype = rownames(distal_ep_mean)
+#Proximal
+proximal = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Proximal Lung"),]
+proximal_ep = proximal[,1:23]
+proximal_ep = t(proximal_ep)
+proximal_ep_mean = as.matrix(rowMeans(proximal_ep))
+proximal_ep_mean = as.data.frame(proximal_ep_mean)
+proximal_ep_mean$celltype = rownames(proximal_ep_mean)
+#Ambiguous
+ambi = rel_risk[which(rel_risk$infer_coo_non_apobec_sigp=="Ambiguous"),]
+ambi_ep = ambi[,1:23]
+ambi_ep = t(ambi_ep)
+ambi_ep_mean = as.matrix(rowMeans(ambi_ep))
+ambi_ep_mean = as.data.frame(ambi_ep_mean)
+ambi_ep_mean$celltype = rownames(ambi_ep_mean)
+
+#Load WCM-1 GLM output. Get vector with relative risks per centroid.
+wcm = readRDS(file.path(params$fileLoc,"EDF/EDF6/6A_cov_res.rds"))
+wcm_mat = wcm[,c("celltype","estimate")]
+wcm_mat = as.data.frame(wcm_mat)
+rownames(wcm_mat) = wcm_mat$celltype
+wcm_mat1 = as.data.frame(wcm_mat[,2])
+rownames(wcm_mat1) = rownames(wcm_mat)
+colnames(wcm_mat1) = "estimate"
+
+#Compute euclidean distances between average relative risk vectors of distal, proximal, or ambiguous samples.
+CalculateEuclideanDistance <- function(vect1, vect2) sqrt(sum((vect1 - vect2)^2))
+distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate)
+prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate)
+ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate)
+distances = c(distal_dist = CalculateEuclideanDistance(distal_ep_mean$V1, wcm_mat1$estimate),
+              prox_dist = CalculateEuclideanDistance(proximal_ep_mean$V1, wcm_mat1$estimate),
+              ambi_dist = CalculateEuclideanDistance(ambi_ep_mean$V1, wcm_mat1$estimate))
+
+#Results are saved in the distances data.frame object (figure was manually made based on this object).
+distances = as.data.frame(distances)
+distances$Vector = rownames(distances)
+DT::datatable(distances, options = list(scrollX = TRUE), caption = "Distances Table")
+                     
+# ------------------------------------------------------------------------------------------------
+# EDF 6B 
 # ------------------------------------------------------------------------------------------------
 ```{r, extfig10A, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
 
-tmp.plot = readRDS("../data/EDF/EDF10/10AB_data.rds")
+tmp.plot = readRDS("../data/EDF/EDF6/6BC_data.rds")
 
 highlight_color <- "darkslategray3"  # Color for WCM-1
 grey_color <- "grey"        # Color for other patients
@@ -1214,14 +1276,15 @@ p <- ggplot(tmp.plot, aes(x, y, colour = color), size = 3) +
   theme(legend.position = "top") +
   scale_colour_identity()
 print(p)
+                     
 # ------------------------------------------------------------------------------------------------
-# EDF 10 B
+# EDF 6C
 # ------------------------------------------------------------------------------------------------
 #Load libraries.
 library(skitools)
 library(RColorBrewer)
 
-tmp.plot = readRDS("../data/EDF/EDF10/10AB_data.rds")
+tmp.plot = readRDS("../data/EDF/EDF6/6BC_data.rds")
 
 my_colors <- colorRampPalette(brewer.pal(12, "Set3"))(length(unique(tmp.plot$cluster)))
 my_colors[1] <- 'turquoise4'
