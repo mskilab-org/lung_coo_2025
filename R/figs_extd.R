@@ -56,9 +56,8 @@ colnames(tmp.df)[2] = 'Aneuploidy.Score.mean'
 #Add diversity (entropy) value per cluster. 
 tmp.df$S.Diversity.num = exp_shannon
 
-
-#Label carcinoma cluster based on high aneuploidy and low entropy.
-tmp.df$cat = ifelse(((tmp.df$S.Diversity.num < 10) &(tmp.df$Aneuploidy.Score.mean > 40)),"Carcinoma","Others")
+#Label carcinoma clusters based on high aneuploidy and low entropy.
+tmp.df$cat = ifelse(((tmp.df$S.Diversity.num < 10) &(tmp.df$Aneuploidy.Score.mean > 40)),"Carcinoma","Non-Carcinoma")
 tmp.nw = tmp.plot[,.(Tissue,seurat_clusters)]
 tmp.nw = as.data.frame(tmp.nw)
 tmp.dt = tmp.df
@@ -66,10 +65,6 @@ tmp.df = as.data.frame(tmp.df)
 tmp.df = merge(tmp.df,tmp.nw,by='seurat_clusters')
 tmp.df.nw = tmp.df %>%  distinct(seurat_clusters, .keep_all = TRUE)
 tmp.df.nw = as.data.table(tmp.df.nw)
-#Add annotations for non-carcinoma clusters based on their associated tissue (tumor associated epithlial or normal).
-tmp.df.nw[which((tmp.df.nw$Tissue == "Tumor" | tmp.df.nw$Tissue == "Metastasis") & (tmp.df.nw$cat == "Others")),"cat"] = "Tumor Associated Epithelial"
-tmp.df.nw[which(tmp.df.nw$Tissue== "Adjacent Lung") & (tmp.df.nw$cat == "Others"),"cat"] = "Normal"
-tmp.df.nw[13,'cat']="Carcinoma"
 
 #Generate scatterplot for Sup 1B.
 p = ggscatter(tmp.df.nw, x = "S.Diversity.num", y = "Aneuploidy.Score.mean",
@@ -82,14 +77,14 @@ for(i in 1:nrow(tmp.df.nw)){
     tmp.plot[tmp.plot$seurat_clusters==tmp.df.nw$seurat_clusters[i],]$cat = tmp.df.nw$cat[i]  
     }
 #Organize cells by annotation.
-tmp.plot$cat = factor(tmp.plot$cat, levels = c("Normal","Tumor Associated Epithelial","Carcinoma"))
+tmp.plot$cat = factor(tmp.plot$cat, levels = c("Non-Carcinoma","Carcinoma"))
 tmp.plot = tmp.plot[order(tmp.plot$cat),]                   
 
 #Organize rows in aneuploidy output for heatmap.
 tmp.l.nw = tmp.l.norm[match(tmp.plot$cell,rownames(tmp.l.norm)),]
 
 #Set heatmap annotation and color.
-row.ha = HeatmapAnnotation(Tissue = tmp.plot$cat, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Tissue = c("Carcinoma" = "#F8766D", "Normal" = "#00BA38", "Tumor Associated Epithelial" = "#619CFF")), annotation_legend_param = list("Normal", "Tumor Epithelial", "Carcinoma"), which = "row")
+row.ha = HeatmapAnnotation(Tissue = tmp.plot$cat, name = 'Tissue', width = unit(2, "cm"), show_legend = TRUE, show_annotation_name = FALSE, col = list(Tissue = c("Carcinoma" = "#F8766D", "Non-Carcinoma" = "#00BA38")), annotation_legend_param = list("Normal", "Tumor Epithelial", "Carcinoma"), which = "row")
 library(circlize)
 col_fun = colorRamp2(c(-10, 0, 10), c("blue", "white", "red"))
 #Plot heatmap.
@@ -155,7 +150,7 @@ DiagrammeR::render_graph(tree_graph)
 library(skitools)
 
 #Load file with cell metadata and identity call results.
-normal_labs = fread("../data/EDF/EDF3/3_combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv")
+normal_labs = fread("../data/EDF/EDF3/3A_combined_emb_for_normal_for_homogenous_sikk_ep_nw5.csv")
 #Filter results based on uncertainty of identity calls. If uncertainty is lower than 0.5, label as unknown.
 normal_labs$ann_finest_lev_transferred_label_filtered = ifelse(normal_labs$ann_finest_lev_transfer_uncert < 0.5,normal_labs$ann_finest_lev_transferred_label_unfiltered,"Unknown")
 #Filter for identity call results and true identity labels.
@@ -217,13 +212,13 @@ p = ggplot(acc_mat, aes(x = cat, y = V1)) +
 print(p)
                                                                              
 # ------------------------------------------------------------------------------------------------
-# EDF 4A
+# EDF 3B - Left Panel
 # ------------------------------------------------------------------------------------------------
 #Load required libraries.
 library(skitools)
 
 #Load GRanges with centroid expression data.
-juan.genes.gr.nw = readRDS("../data/EDF/EDF4/4B_genes_gr_LUSC.rds")
+juan.genes.gr.nw = readRDS("../data/EDF/EDF3/3BLP_genes_gr_LUAD.rds")
 juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
 
 #Define quantiles for partitioning the genes by basal resting expression.
@@ -244,7 +239,7 @@ highsup.quant$Quart = 'Q3'
 sup.quart.mat <- rbind(lowsup.quant,midsup.quant,highsup.quant)
 
 #Load GRanges with snv counts information per gene for LUAD. Convert to mutational density.
-mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF4/4AB_mgenes.rds"))
+mgenes= readRDS(file.path(params$fileLoc,"EDF/EDF3/3B_mgenes.rds"))
 mgenes2 <- copy(mgenes)
 juan.genes.gr.nw.dt$densityLUSC <- (10**6)*juan.genes.gr.nw.dt$snv.count/(juan.genes.gr.nw.dt$width*53)
 
@@ -344,13 +339,13 @@ p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
                                                                              
 # ------------------------------------------------------------------------------------------------
-# EDF 4B
+# EDF 3B - Right Panel
 # ------------------------------------------------------------------------------------------------
 #Load required libraries.
 library(skitools)
 
 #Load GRanges with centroid expression data.
-juan.genes.gr.nw = readRDS("../data/EDF/EDF4/4B_genes_gr_LUSC.rds")
+juan.genes.gr.nw = readRDS("../data/EDF/EDF3/3BRP_genes_gr_LUSC.rds")
 juan.genes.gr.nw.dt = gr2dt(juan.genes.gr.nw)
 
 #Define quantiles for partitioning the genes by basal resting expression.
@@ -471,16 +466,16 @@ p = ggplot(mean.mat.lusc, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 
 # ------------------------------------------------------------------------------------------------
-# EDF 5A
+# EDF 3C - Left Panel
 # ------------------------------------------------------------------------------------------------
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
-dt2 = readRDS("../data/EDF/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
-dt3 = readRDS("../data/EDF/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt1 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
+dt2 = readRDS("../data/EDF/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/EDF/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with tobacco counts per patient. Save with pair ID as data.table.
@@ -574,16 +569,16 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 
 print(p)
 # ------------------------------------------------------------------------------------------------
-# EDF 5B
+# EDF 3C - Center Panel
 # ------------------------------------------------------------------------------------------------
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
-dt2 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
-dt3 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt1 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
+dt2 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with aging counts per patient. Save with pair ID as data.table.
@@ -593,7 +588,7 @@ count.int$pair = gsub("snv.aging.count.","",count.int$count.int)
 count.int$pair = toupper(count.int$pair)
 
 #Load list of luad_pairs. 
-luad_pairs = readRDS("../data/EDF/EDF5/5ABC_new.pairs.luad.rds")
+luad_pairs = readRDS("../data/EDF/EDF3/3C_new.pairs.luad.rds")
 juan.genes.dt = gr2dt(dt)
 juan.genes.dt = as.data.frame(juan.genes.dt)
 
@@ -609,7 +604,7 @@ juan_dt1$snv.count = snv_count
 colnames(juan_dt1)[7] = "snv.count"
 
 #Load centroid expression per gene. Append average of centroid expression per gene to data.frame with LUAD tobacco counts per gene.
-sikk.cent = readRDS("../data/EDF/EDF5/5ABC_epcells.rds")
+sikk.cent = readRDS("../data/EDF/EDF3/3C_epcells.rds")
 sikk.cent_nw = sikk.cent[match(juan_dt1$gene_name,rownames(sikk.cent)),]
 sikk.cent_nw = as.data.frame(rowMeans(sikk.cent_nw))
 juan_dt2 = cbind(juan_dt1,sikk.cent_nw)
@@ -677,16 +672,16 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 
 print(p)
 # ------------------------------------------------------------------------------------------------
-# EDF 5C
+# EDF 3C - Right Panel
 # ------------------------------------------------------------------------------------------------
 #Load libraries
 library(skitools)
 
 #Load GRanges with mutational counts per patient.
 #The complete GRanges is too heavy for Github, so load the different parts as data.table, join and convert top GRanges.
-dt1 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
-dt2 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
-dt3 = readRDS("../data/EDF/EDF5/5ABC_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
+dt1 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP1.rds")
+dt2 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP2.rds")
+dt3 = readRDS("../data/EDF/EDF3/3C_DeconstructSigsV3_MutDensity_Patients_SikkCentroids_Vs_Genes_All_Celltypes_PreAvgExprP3.rds")
 dt = dt2gr(rbind(dt1,dt2,dt3))
 
 #Gather columns with apobec counts per patient. Save with pair ID as data.table.
