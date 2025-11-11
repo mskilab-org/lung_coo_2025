@@ -2053,7 +2053,7 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 ```
 
-## Extended Data 3C - Right Panel
+## Extended Data Figure 3C - Right Panel
 ```{r, extfig5CRight, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries
 library(skitools)
@@ -2157,7 +2157,7 @@ p = ggplot(mean.mat.luad, aes(x = Quart, y = Mean_TMB, group = celltype, color =
 print(p)
 ```
 
-##  Extended Data 3D
+##  Extended Data Figure 3D
 ```{r, extfig3D, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
@@ -2210,7 +2210,7 @@ p_acc <- ggpubr::ggarrange(p1_1, p1_2, p1_3, p1_4, p1_5, ncol = 3, nrow = 2)
 print(p_acc)
 ```
 
-# Extended Data Figure 3E
+## Extended Data Figure 3E
 ```{r, extfig3E, dropBelow = TRUE, results = "asis", echo = TRUE, out.width= "100%", fig.align = "center"}
 #Load libraries.
 library(skitools)
